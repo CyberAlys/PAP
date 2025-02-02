@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Log in</title>
+    <style>
+        form {
+
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 250px; /* Optional: Limit form width */
+        }
+
+        input, textarea, button {
+            padding: 3px;
+            font-size: 10px;
+        }
+    </style>
+
+</head>
+<body>
+    <form id="login" action="login.php?type=login" method="post">
+        <input type="text" placeholder="Username" required>
+        <input type="password" placeholder="Password" required>
+        <input type="button" value="Show Password" id="showpass" onclick="showPassword()">
+        <input type="submit" value="Log in">
+    </form>
+
+    <form id="register" action="login.php?type=register" method="post">
+        <input type="text" placeholder="Username" required>
+        <input type="password" placeholder="Password" required>
+
+        <input type="submit" value="Register">
+    </form>
+    <script>
+        function showPassword()
+        {
+            var pass = document.getElementById("password");
+            if (pass.type === "password") {
+                pass.type = "text";
+            } else {
+                pass.type = "password";
+            }
+        }
+    </script>
+</body>
+</html>

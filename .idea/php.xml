@@ -10,6 +10,11 @@
     <option name="highlightLevel" value="WARNING" />
     <option name="transferred" value="true" />
   </component>
+  <component name="PhpCodeSniffer">
+    <phpcs_settings>
+      <phpcs_by_interpreter asDefaultInterpreter="true" interpreter_id="a1772f6a-4d29-49f8-80e2-7ae518ec288d" timeout="30000" />
+    </phpcs_settings>
+  </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />
   <component name="PhpStanOptionsConfiguration">
     <option name="transferred" value="true" />

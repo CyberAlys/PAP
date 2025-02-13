@@ -29,9 +29,9 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `admins` (
   `admid` int(11) NOT NULL,
-  `admusername` varchar(40) NOT NULL,
-  `password` varchar(30) NOT NULL,
-  `password2` varchar(30) NOT NULL,
+  `admusername` varchar(40) NOT NULL UNIQUE,
+  `password` varchar(100) NOT NULL,
+  `password2` varchar(100) NOT NULL,
   `profilepic` text NOT NULL,
   `nome` int(40) NOT NULL,
   `birthday` date NOT NULL,
@@ -48,7 +48,8 @@ CREATE TABLE `comment` (
   `commentid` int(11) NOT NULL,
   `userid` int(11) NOT NULL,
   `responseid` int(11) NOT NULL,
-  `commenttext` text NOT NULL
+   'responsetype' varchar(1) NOT NULL,
+  `commenttext` varchar(300) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -87,8 +88,8 @@ CREATE TABLE `photos` (
 
 CREATE TABLE `users` (
   `userid` int(11) NOT NULL,
-  `username` varchar(40) NOT NULL,
-  `password` varchar(30) NOT NULL,
+  `username` varchar(40) NOT NULL UNIQUE,
+  `password` varchar(100) NOT NULL,
   `profilepic` text NOT NULL,
   `name` varchar(60) NOT NULL,
   `email` varchar(60) NOT NULL,

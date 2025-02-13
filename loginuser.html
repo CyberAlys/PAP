@@ -21,8 +21,8 @@
 </head>
 <body>
     <form id="login" action="login.php?type=login" method="post">
-        <input type="text" placeholder="Username" required>
-        <input type="password" placeholder="Password" required>
+        <input type="text" id="user" name="user" placeholder="Username" required>
+        <input type="password" id="password" name="password" placeholder="Password" required>
         <input type="button" value="Show Password" id="showpass" onclick="showPassword()">
         <input type="submit" value="Log in">
     </form>

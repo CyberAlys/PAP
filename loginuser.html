@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Log in</title>
+    <script src="Loginusers.js"> </script>
+    <script>
+
+    </script>
     <style>
         form {
 
@@ -30,19 +34,15 @@
     <form id="register" action="login.php?type=register" method="post">
         <input type="text" placeholder="Username" required>
         <input type="password" placeholder="Password" required>
+        <input type="password" placeholder="Confirm password" required>
+        <input type="text" placeholder="Name" required>
+        <input type="text" placeholder="Email" required>
+        <input type="date" placeholder="Birthday" required>
 
         <input type="submit" value="Register">
     </form>
-    <script>
-        function showPassword()
-        {
-            var pass = document.getElementById("password");
-            if (pass.type === "password") {
-                pass.type = "text";
-            } else {
-                pass.type = "password";
-            }
-        }
-    </script>
+    <h6>You don't have an account yet? <a id="RegisterText" onclick="">Register</a></h6>
+    <h6>You alread have an account <a id="LoginText" onclick="">Log-In</a></h6>
+
 </body>
 </html>

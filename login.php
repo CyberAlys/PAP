@@ -1,5 +1,14 @@
 <?php
     include("conexion.php");
+
+ function login()
+ {
+
+ }
+ function register()
+ {
+
+ }
   $type = $_GET['type'];
 
   if ($type == "login") {

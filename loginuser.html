@@ -7,42 +7,59 @@
     <script>
 
     </script>
-    <style>
-        form {
+        <style>
+            form {
 
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 250px; /* Optional: Limit form width */
-        }
+                display: block;
+                flex-direction: column;
+                gap: 10px;
+                max-width: 400px;
 
-        input, textarea, button {
-            padding: 3px;
-            font-size: 10px;
-        }
-    </style>
+            }
 
+            input, textarea, button {
+                padding: 3px;
+                font-size: 10px;
+                margin-bottom: 10px;
+            }
+       </style>
+<!--    <link href="css/Modal.css" rel="stylesheet">-->
 </head>
 <body>
-    <form id="login" action="login.php?type=login" method="post">
-        <input type="text" id="user" name="user" placeholder="Username" required>
-        <input type="password" id="password" name="password" placeholder="Password" required>
-        <input type="button" value="Show Password" id="showpass" onclick="showPassword()">
-        <input type="submit" value="Log in">
+    <form id="login" action="login.php?type=login" method="post"> <br>
+        <input type="text" id="log-user" name="user" placeholder="Username" required> <br>
+        <input type="password" id="log-password" name="password" placeholder="Password" required> <br>
+        <input type="button" value="Show Password" id="showpasslog" onclick="showPasswordlogin()"> <br>
+        <input type="submit" value="Log in"> <br>
     </form>
 
-    <form id="register" action="login.php?type=register" method="post">
-        <input type="text" placeholder="Username" required>
-        <input type="password" placeholder="Password" required>
-        <input type="password" placeholder="Confirm password" required>
-        <input type="text" placeholder="Name" required>
-        <input type="text" placeholder="Email" required>
-        <input type="date" placeholder="Birthday" required>
+    <form id="register" onsubmit="return RegisterPHP()" method="post"  style="display: none">
+        <input type="text" placeholder="Username" id="Reg-Username" required> <br>
+        <input type="password" placeholder="Password" id="Reg-Password" required> <br>
+        <input type="password" placeholder="Confirm password" id="Reg-confPass" required> <br>
+        <input type="text" placeholder="Name" id="Reg-Name" required> <br>
+        <input type="email" placeholder="Email" id="Reg-Email" required> <br>
+        <input type="date" placeholder="Birthday" id="Reg-Birth" required>  <br>
+        <input type="button" value="Show Password" id="showpassreg" onclick="showPasswordreg()"> <br>
+<!--        <input type="checkbox" id="terms"> <label> You must agree with the terms and conditions</label> <br>-->
 
-        <input type="submit" value="Register">
+        <input type="submit" value="Register" id="Reg-SubBtt">
     </form>
-    <h6>You don't have an account yet? <a id="RegisterText" onclick="">Register</a></h6>
-    <h6>You alread have an account <a id="LoginText" onclick="">Log-In</a></h6>
+    <h5 style="display: block"  id="switchtoregister">You don't have an account yet? <a id="RegisterText" href="javascript:showregiser()">Register</a> </h5>
+    <h5 style="display: none" id="switchtologin">You already have an account? <a id="LoginText" href="javascript:showlogin()" >Log-In</a> </h5>
+
+<!--    <div class="Modal" id="Modal">-->
+<!--        <div class="Modal-Header">-->
+<!--            <div class="Tittle">-->
+<!--                Terms And Conditions-->
+<!--            </div>-->
+<!--            <button class="Close Button">&times;</button>-->
+<!--        </div>-->
+<!--        <div class="Modal-Body">-->
+<!--            By accepting the terms and conditions you agree to sell your soul under the nearest bridge; To run around naked in a full moon night at least once every year and to smash that like and subscribe-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <div id="Overlay"></div>-->
 
 </body>
 </html>

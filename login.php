@@ -106,7 +106,7 @@
         //calculate the age
         $birthdate = new DateTime($birthday);
         $today = new DateTime();
-        $age = $today->diff($birthday)->y;
+        $age = $today->diff($birthdate)->y;
 
 
         //verifications

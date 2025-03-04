@@ -48,7 +48,7 @@ CREATE TABLE `comment` (
   `commentid` int(11) NOT NULL,
   `userid` int(11) NOT NULL,
   `responseid` int(11) NOT NULL,
-  'responsetype' varchar(1) NOT NULL,
+  `responsetype` varchar(1) NOT NULL,
   `commenttext` varchar(300) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -189,7 +189,7 @@ ALTER TABLE `likes`
 ALTER TABLE `photos`
   ADD CONSTRAINT `adm` FOREIGN KEY (`userid`) REFERENCES `admins` (`admid`) ON UPDATE CASCADE,
   ADD CONSTRAINT `user` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON UPDATE CASCADE;
-COMMIT;
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

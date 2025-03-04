@@ -17,15 +17,16 @@
 
             }
 
-            input, textarea, button {
+            input, textarea, button, label {
                 padding: 3px;
                 font-size: 10px;
                 margin-bottom: 10px;
             }
        </style>
-<!--    <link href="css/Modal.css" rel="stylesheet">-->
+    <link href="css/Modal.css" rel="stylesheet">
 </head>
 <body>
+<!-- LOG IN FORM -->
     <form id="login" action="login.php?type=login" method="post"> <br>
         <input type="text" id="log-user" name="user" placeholder="Username" required> <br>
         <input type="password" id="log-password" name="password" placeholder="Password" required> <br>
@@ -33,20 +34,22 @@
         <input type="submit" value="Log in"> <br>
     </form>
 
-    <form id="register" onsubmit="return RegisterPHP()" method="post"  style="display: none">
+<!-- REGISTER FORM -->
+    <form id="register" onsubmit="return RegisterPHP(new FormData(this))" method="post"  style="display: none">
         <input type="text" placeholder="Username" id="Reg-Username" required> <br>
-        <input type="password" placeholder="Password" id="Reg-Password" required> <br>
-        <input type="password" placeholder="Confirm password" id="Reg-confPass" required> <br>
+        <input type="password" placeholder="Password" id="Reg-Password" minlength="6" maxlength="30" required> <br>
+        <input type="password" placeholder="Confirm password" id="Reg-confPass" minlength="6" maxlength="30" required> <br>
         <input type="text" placeholder="Name" id="Reg-Name" required> <br>
         <input type="email" placeholder="Email" id="Reg-Email" required> <br>
         <input type="date" placeholder="Birthday" id="Reg-Birth" required>  <br>
         <input type="button" value="Show Password" id="showpassreg" onclick="showPasswordreg()"> <br>
-<!--        <input type="checkbox" id="terms"> <label> You must agree with the terms and conditions</label> <br>-->
-
-        <input type="submit" value="Register" id="Reg-SubBtt">
+        <label style="font-size: 15px"> By registering you are agreeing with the terms and conditions</label> <br style="margin-bottom: 10px">
+        <input style="margin-top: 15px" type="submit" value="Register" id="Reg-SubBtt">
     </form>
     <h5 style="display: block"  id="switchtoregister">You don't have an account yet? <a id="RegisterText" href="javascript:showregiser()">Register</a> </h5>
     <h5 style="display: none" id="switchtologin">You already have an account? <a id="LoginText" href="javascript:showlogin()" >Log-In</a> </h5>
+
+<!-- TERMS AND CONDITIONS // TO DO -->
 
 <!--    <div class="Modal" id="Modal">-->
 <!--        <div class="Modal-Header">-->
@@ -56,10 +59,10 @@
 <!--            <button class="Close Button">&times;</button>-->
 <!--        </div>-->
 <!--        <div class="Modal-Body">-->
-<!--            By accepting the terms and conditions you agree to sell your soul under the nearest bridge; To run around naked in a full moon night at least once every year and to smash that like and subscribe-->
+<!--            By accepting the terms and conditions you agree to sell your soul under the nearest bridge; To run around-->
+<!--            naked in a full moon night at least once every year and to smash that like and subscribe-->
 <!--        </div>-->
 <!--    </div>-->
 <!--    <div id="Overlay"></div>-->
-
 </body>
 </html>

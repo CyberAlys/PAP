@@ -1,5 +1,11 @@
 <?php
-$liga = mysqli_connect("localhost","root","","pap");
-if (!$liga) {
-	echo "Error ao conectar";
-}
+    try {
+        $liga = mysqli_connect("localhost","root","","pap");
+        if (!$liga) {
+            throw new Exception("Error ao conectar: " . mysqli_connect_error());
+        }
+    } catch (Exception $e) {
+        echo json_encode(["error" => $e->getMessage()]);
+        exit;
+    }
+global $liga;

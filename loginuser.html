@@ -35,17 +35,17 @@
     </form>
 
 <!-- REGISTER FORM -->
-    <form id="register" onsubmit="return RegisterPHP(new FormData(this))" method="post"  style="display: none">
-        <input type="text" placeholder="Username" id="Reg-Username" required> <br>
-        <input type="password" placeholder="Password" id="Reg-Password" minlength="6" maxlength="30" required> <br>
-        <input type="password" placeholder="Confirm password" id="Reg-confPass" minlength="6" maxlength="30" required> <br>
-        <input type="text" placeholder="Name" id="Reg-Name" required> <br>
-        <input type="email" placeholder="Email" id="Reg-Email" required> <br>
-        <input type="date" placeholder="Birthday" id="Reg-Birth" required>  <br>
-        <input type="button" value="Show Password" id="showpassreg" onclick="showPasswordreg()"> <br>
-        <label style="font-size: 15px"> By registering you are agreeing with the terms and conditions</label> <br style="margin-bottom: 10px">
-        <input style="margin-top: 15px" type="submit" value="Register" id="Reg-SubBtt">
-    </form>
+<form id="register" onsubmit="return RegisterPHP(new FormData(this))" method="post" style="display: none">
+    <input type="text" placeholder="Username" id="Reg-Username" name="Reg-Username" required> <br>
+    <input type="password" placeholder="Password" id="Reg-Password" name="Reg-Password" minlength="6" maxlength="30" required> <br>
+    <input type="password" placeholder="Confirm password" id="Reg-confPass" name="Reg-confPass" minlength="6" maxlength="30" required> <br>
+    <input type="text" placeholder="Name" id="Reg-Name" name="Reg-Name" required> <br>
+    <input type="email" placeholder="Email" id="Reg-Email" name="Reg-Email" required> <br>
+    <input type="date" placeholder="Birthday" id="Reg-Birth" name="Reg-Birth" required>  <br>
+    <input type="button" value="Show Password" id="showpassreg" onclick="showPasswordreg()"> <br>
+    <label style="font-size: 15px"> By registering you are agreeing with the terms and conditions</label> <br style="margin-bottom: 10px">
+    <input style="margin-top: 15px" type="submit" value="Register" id="Reg-SubBtt">
+</form>
     <h5 style="display: block"  id="switchtoregister">You don't have an account yet? <a id="RegisterText" href="javascript:showregiser()">Register</a> </h5>
     <h5 style="display: none" id="switchtologin">You already have an account? <a id="LoginText" href="javascript:showlogin()" >Log-In</a> </h5>
 

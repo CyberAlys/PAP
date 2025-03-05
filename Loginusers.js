@@ -34,7 +34,7 @@ function showPasswordreg()
 }
 
 //switches the form from the log in to the register
-    function showregiser()
+    function showregitser()
     {
         document.getElementById('register').style.display =  'block';
         document.getElementById('switchtologin').style.display = 'block';
@@ -69,7 +69,7 @@ function showPasswordreg()
             method: 'POST',
             body: formdata
         })
-        //respose is an object that gets what the fetch returns
+        //response is an object that gets what the fetch returns
         .then(response => {
                 //response.ok serves as a bool that it's true if the status range is 200-299(successfull)
                 if (!response.ok)
@@ -112,6 +112,52 @@ function showPasswordreg()
                 console.error('Error', error);
                 alert('Error during registration: ' + error.message);
             });
+
+        return false;
+    }
+
+
+    //function to log in //comment tomorrow... do php as well
+    function LoginPHP()
+    {
+    const formData = new FormData(document.getElementById('login'));
+
+    fetch('login.php?type=login',
+        {method: 'POST',
+            body: formData
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.token && data.username) {
+                // Add debugging
+                console.log("Login successful, setting localStorage:", data);
+
+                // Store token in localStorage
+                sessionStorage.setItem('authToken', data.token);
+                sessionStorage.setItem('username', data.username);
+                sessionStorage.setItem('userid', data.userid);
+
+                // Verify localStorage was set
+                console.log("localStorage set:", {
+                    token: localStorage.getItem('authToken'),
+                    username: localStorage.getItem('username'),
+                    userid: sessionStorage.getItem('userid')
+                });
+
+                window.location.href = 'testelog.html';
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao fazer login: ' + error.message);
+        });
 
         return false;
     }

@@ -178,7 +178,7 @@
     }
 
 
-    function login()
+    function loginPHP()
     {
 
     }

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Log in</title>
+
     <script src="Loginusers.js"> </script>
     <script>
 
@@ -23,11 +24,12 @@
                 margin-bottom: 10px;
             }
        </style>
+
     <link href="css/Modal.css" rel="stylesheet">
 </head>
 <body>
 <!-- LOG IN FORM -->
-    <form id="login" action="login.php?type=login" method="post"> <br>
+    <form id="login" onsubmit="return LoginPHP()" method="post"> <br>
         <input type="text" id="log-user" name="user" placeholder="Username" required> <br>
         <input type="password" id="log-password" name="password" placeholder="Password" required> <br>
         <input type="button" value="Show Password" id="showpasslog" onclick="showPasswordlogin()"> <br>
@@ -46,7 +48,7 @@
     <label style="font-size: 15px"> By registering you are agreeing with the terms and conditions</label> <br style="margin-bottom: 10px">
     <input style="margin-top: 15px" type="submit" value="Register" id="Reg-SubBtt">
 </form>
-    <h5 style="display: block"  id="switchtoregister">You don't have an account yet? <a id="RegisterText" href="javascript:showregiser()">Register</a> </h5>
+    <h5 style="display: block"  id="switchtoregister">You don't have an account yet? <a id="RegisterText" href="javascript:showregitser()">Register</a> </h5>
     <h5 style="display: none" id="switchtologin">You already have an account? <a id="LoginText" href="javascript:showlogin()" >Log-In</a> </h5>
 
 <!-- TERMS AND CONDITIONS // TO DO -->

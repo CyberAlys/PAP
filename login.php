@@ -34,7 +34,7 @@
     }
 
     //creates and returns the tokens
-    function generatetokens($userId)
+    function generatetoken($userId)
     {
         //random number generator that generates 32 bytes then converts them to hexadecimal
         $random = bin2hex(random_bytes(32));
@@ -162,7 +162,7 @@
         {
             //if the query is sucessfull it will extract the necessary information to create the tokens in js
             $userid = $stmt->insert_id;
-            $token = generatetokens($userid);
+            $token = generatetoken($userid);
 
             echo json_encode([
                 "message" => "Account created successfully",
@@ -178,7 +178,50 @@
     }
 
 
-    function loginPHP()
+    //login function (similar to register so fewer details)
+    function login()
     {
+        global $liga;
 
+        //grab info from js
+        $username = $_POST['username'];
+        $password  = $_POST['password'];
+
+        //query stuff
+        $sql = "SELECT * FROM users WHERE username = ?";
+
+        $stmt = $liga -> prepare($sql);
+        $stmt ->bind_param("?", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+       // $result = $mysqli->execute_query("SELECT * FROM users WHERE username = '".$username."' ");
+
+        //if match for username is found
+        if($result -> num_rows > 0)
+        {
+            $user = $result->fetch_assoc();
+            //password_verify checks if the password inputted by the user matches with the hash that the DB provides
+            if(password_verify($password, $user['password']))
+            {
+                $token = generatetoken($user['userid']);
+
+
+                echo json_encode([
+                    "message" => "Logged in successfully",
+                    "token" => $token,
+                    "username" => $user['username'],
+                    "userid" => $user['userid']
+
+                ]);
+            }
+            else
+            {
+                echo json_encode(["message" => "Wrong Password"]);
+            }
+        }
+        else
+        {
+            echo json_encode(["message" => "User not found"]);
+        }
     }

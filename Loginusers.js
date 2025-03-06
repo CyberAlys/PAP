@@ -99,6 +99,7 @@ function showPasswordreg()
                 sessionStorage.setItem('authToken', data.token);
                 sessionStorage.setItem('username', data.username);
                 sessionStorage.setItem('userid', data.userid);
+
                 window.location.replace('mainpage.html');
              }
              else
@@ -120,8 +121,10 @@ function showPasswordreg()
     //function to log in //comment tomorrow... do php as well
     function LoginPHP()
     {
+        //grabs data from the form (another way to do the same thing done above)
     const formData = new FormData(document.getElementById('login'));
 
+        //call ajax
     fetch('login.php?type=login',
         {method: 'POST',
             body: formData
@@ -134,29 +137,28 @@ function showPasswordreg()
         })
         .then(data => {
             if (data.token && data.username) {
-                // Add debugging
-                console.log("Login successful, setting localStorage:", data);
 
-                // Store token in localStorage
+                // Store tokens in localStorage
                 sessionStorage.setItem('authToken', data.token);
                 sessionStorage.setItem('username', data.username);
                 sessionStorage.setItem('userid', data.userid);
 
-                // Verify localStorage was set
+                // Verify if localStorage was set
                 console.log("localStorage set:", {
                     token: localStorage.getItem('authToken'),
                     username: localStorage.getItem('username'),
                     userid: sessionStorage.getItem('userid')
                 });
 
-                window.location.href = 'testelog.html';
+                //going to the new webpage
+                window.location.href = 'mainpage.html';
             } else {
                 alert(data.message);
             }
         })
         .catch(error => {
             console.error('Erro:', error);
-            alert('Erro ao fazer login: ' + error.message);
+            alert('Error logging in: ' + error.message);
         });
 
         return false;

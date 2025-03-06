@@ -184,18 +184,16 @@
         global $liga;
 
         //grab info from js
-        $username = $_POST['username'];
-        $password  = $_POST['password'];
+        $username = $_POST['log-user'];
+        $password  = $_POST['log-password'];
 
         //query stuff
         $sql = "SELECT * FROM users WHERE username = ?";
 
         $stmt = $liga -> prepare($sql);
-        $stmt ->bind_param("?", $username);
+        $stmt ->bind_param("s", $username);
         $stmt->execute();
         $result = $stmt->get_result();
-
-       // $result = $mysqli->execute_query("SELECT * FROM users WHERE username = '".$username."' ");
 
         //if match for username is found
         if($result -> num_rows > 0)

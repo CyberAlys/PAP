@@ -157,7 +157,7 @@ function showPasswordreg()
             }
         })
         .catch(error => {
-            console.error('Erro:', error);
+            console.error('Error:', error);
             alert('Error logging in: ' + error.message);
         });
 

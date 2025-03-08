@@ -97,6 +97,7 @@ function showPasswordreg()
              {
                  //stores the tokens in the browser and changes the webpage
                 sessionStorage.setItem('authToken', data.token);
+                sessionStorage.setItem('type', data.type);
                 sessionStorage.setItem('username', data.username);
                 sessionStorage.setItem('userid', data.userid);
 
@@ -118,7 +119,7 @@ function showPasswordreg()
     }
 
 
-    //function to log in //comment tomorrow... do php as well
+    //function to log in
     function LoginPHP()
     {
         //grabs data from the form (another way to do the same thing done above)
@@ -140,12 +141,14 @@ function showPasswordreg()
 
                 // Store tokens in localStorage
                 sessionStorage.setItem('authToken', data.token);
+                sessionStorage.setItem('type', data.type);
                 sessionStorage.setItem('username', data.username);
                 sessionStorage.setItem('userid', data.userid);
 
                 // Verify if localStorage was set
                 console.log("localStorage set:", {
                     token: localStorage.getItem('authToken'),
+                    type: localStorage.getItem('type'),
                     username: localStorage.getItem('username'),
                     userid: sessionStorage.getItem('userid')
                 });

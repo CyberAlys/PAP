@@ -95,6 +95,9 @@
         //grab $liga from connection.php
         global $liga;
 
+        //define user_type
+        $user_type = "user";
+
         //grab info from form
         $username = $_POST['Reg-Username'];
         $password= $_POST['Reg-Password'];
@@ -152,10 +155,10 @@
         $profilepic = "photos/profile_pictures/Default_pfp.jpg";
 
         //query to insert and the statement that replaces the "?"'s
-        $sql = "Insert into users (username, password, name, email, birthday, profilepic) 
-                    VALUES (?, ?, ?, ?, ? ,?)";
+        $sql = "INSERT INTO `users` (`userid`, `user_type`, `username`, `password`, `AdmPin`, `profilepic`, `name`, `email`, `birthday`) 
+VALUES (NULL, ?, ?, ?, NULL, ?, ?, ?, ?);";
         $stmt =$liga->prepare($sql);
-        $stmt-> bind_param( "ssssss", $username,
+        $stmt-> bind_param( "sssssss",$user_type, $username,
             $hashpassword, $name, $email, $birthday, $profilepic );
 
         if ($stmt->execute())
@@ -167,6 +170,7 @@
             echo json_encode([
                 "message" => "Account created successfully",
                 "token" => $token,
+                "type" => $user_type,
                 "username" => $username,
                 "userid" => $userid
             ]);
@@ -182,6 +186,7 @@
     function login()
     {
         global $liga;
+
 
         //grab info from js
         $username = $_POST['log-user'];
@@ -204,10 +209,13 @@
             {
                 $token = generatetoken($user['userid']);
 
+                //define user type
+                $user_type = $user['user_type'];
 
                 echo json_encode([
                     "message" => "Logged in successfully",
                     "token" => $token,
+                    "type" => $user_type,
                     "username" => $user['username'],
                     "userid" => $user['userid']
 

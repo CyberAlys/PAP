@@ -55,12 +55,6 @@ function showPasswordreg()
         document.title = "Log In";
     }
 
-//function that shows the terms and conditions window
-    // function termsandconditions()
-    // {
-    //
-    // }
-
 //register function
     function RegisterPHP(formdata)
     {
@@ -96,7 +90,7 @@ function showPasswordreg()
              if(data.token && data.username)
              {
                  //stores the tokens in the browser and changes the webpage
-                sessionStorage.setItem('authToken', data.token);
+                localStorage.setItem('authToken', data.token);
                 sessionStorage.setItem('type', data.type);
                 sessionStorage.setItem('username', data.username);
                 sessionStorage.setItem('userid', data.userid);

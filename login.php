@@ -156,7 +156,7 @@
 
         //query to insert and the statement that replaces the "?"'s
         $sql = "INSERT INTO `users` (`userid`, `user_type`, `username`, `password`, `AdmPin`, `profilepic`, `name`, `email`, `birthday`) 
-VALUES (NULL, ?, ?, ?, NULL, ?, ?, ?, ?);";
+        VALUES (NULL, ?, ?, ?, NULL, ?, ?, ?, ?);";
         $stmt =$liga->prepare($sql);
         $stmt-> bind_param( "sssssss",$user_type, $username,
             $hashpassword, $name, $email, $birthday, $profilepic );

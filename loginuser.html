@@ -45,7 +45,7 @@
     <input type="email" placeholder="Email" id="Reg-Email" name="Reg-Email" required> <br>
     <input type="date" placeholder="Birthday" id="Reg-Birth" name="Reg-Birth" required>  <br>
     <input type="button" value="Show Password" id="showpassreg" onclick="showPasswordreg()"> <br>
-    <label style="font-size: 15px"> By registering you are agreeing with the terms and conditions</label> <br style="margin-bottom: 10px">
+    <label style="font-size: 15px"> By registering you are agreeing with the <a id="terms" href="javascript:open()">terms and conditions</a> </label> <br style="margin-bottom: 10px">
     <input style="margin-top: 15px" type="submit" value="Register" id="Reg-SubBtt">
 </form>
     <h5 style="display: block"  id="switchtoregister">You don't have an account yet? <a id="RegisterText" href="javascript:showregitser()">Register</a> </h5>
@@ -53,18 +53,49 @@
 
 <!-- TERMS AND CONDITIONS // TO DO -->
 
-<!--    <div class="Modal" id="Modal">-->
-<!--        <div class="Modal-Header">-->
-<!--            <div class="Tittle">-->
-<!--                Terms And Conditions-->
-<!--            </div>-->
-<!--            <button class="Close Button">&times;</button>-->
-<!--        </div>-->
-<!--        <div class="Modal-Body">-->
-<!--            By accepting the terms and conditions you agree to sell your soul under the nearest bridge; To run around-->
-<!--            naked in a full moon night at least once every year and to smash that like and subscribe-->
-<!--        </div>-->
-<!--    </div>-->
-<!--    <div id="Overlay"></div>-->
+    <div class="Modal" id="Modal">
+        <div class="Modal-Header">
+            <div class="Tittle">
+                Terms And Conditions
+            </div>
+            <button id="close" class="Close-Button">&times;</button>
+        </div>
+        <div class="Modal-Body">
+            By accepting the terms and conditions you agree to sell your soul under the nearest bridge; <br>
+            To run around naked in a full moon night at least once every year; <br>
+            And to smash that like and subscribe. <br>
+        </div>
+    </div>
+    <div id="Overlay"></div>
+
+    <script>
+        //grab the buttons
+        var modal = document.getElementById("Modal");
+        var overlay = document.getElementById("Overlay");
+        var btnclose = document.getElementById("close");
+
+        //open modal
+        function open()
+        {
+            modal.style.display = "Block";
+            overlay.style.opacity = "1";
+        }
+
+        //close modal
+        btnclose.onclick = function()
+        {
+            modal.style.display = "none";
+            overlay.style.opacity = "0";
+        }
+
+        //it don't work
+        window.onclick = function (event) {
+            if(event.target === modal) {
+                modal.style.display = "none";
+                overlay.style.opacity = "0";
+            }
+        }
+
+    </script>
 </body>
 </html>

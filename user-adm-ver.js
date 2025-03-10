@@ -1,6 +1,9 @@
 function checkadm()
 {
-    localStorage.getItem('authToken');
+    var authtoken = localStorage.getItem('authToken');
+    var usertoken= sessionStorage.getItem('username');
+
+    if(usertoken.)
 }
 
 function checklogin()

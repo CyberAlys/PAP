@@ -134,7 +134,7 @@ function showPasswordreg()
             if (data.token && data.username) {
 
                 // Store tokens in localStorage
-                sessionStorage.setItem('authToken', data.token);
+                localStorage.setItem('authToken', data.token);
                 sessionStorage.setItem('type', data.type);
                 sessionStorage.setItem('username', data.username);
                 sessionStorage.setItem('userid', data.userid);

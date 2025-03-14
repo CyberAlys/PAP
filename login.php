@@ -22,6 +22,10 @@
             {
                 login();
             }
+            elseif ($type == 're-login')
+            {
+                relogin();
+            }
             else
             {
                 echo json_encode(["message" => "Invalid Action type"]);
@@ -230,4 +234,9 @@
         {
             echo json_encode(["message" => "User not found"]);
         }
+    }
+
+    function relogin()
+    {
+
     }

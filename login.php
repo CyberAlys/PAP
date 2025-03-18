@@ -8,7 +8,7 @@
     //defines the header it says that the response should be intreperted as JSON data
     header('Content-Type: application/json');
 
-    //checks to see the type of operation (login or register)
+    //checks to see the type of operation (login or register or other operations)
     if($_SERVER['REQUEST_METHOD'] === 'POST')
     {
         try
@@ -238,5 +238,5 @@
 
     function relogin()
     {
-
+        $token = file_get_contents("php://input");
     }

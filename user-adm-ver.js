@@ -7,7 +7,7 @@ function checklogin()
 
     if(!usertoken && authtoken)
     {
-        fetch('login.php?type=re-login', {
+        fetch('login.php?type=FindUserandId', {
             method: 'POST' ,
             body: authtoken
          })
@@ -38,6 +38,10 @@ function checklogin()
                 console.error('Error:', error);
                 alert('Error logging in: ' + error.message);
             });
+    }
+    if(!authtoken && !usertoken)
+    {
+        window.location.href = 'loginuser.html';
     }
 
 }

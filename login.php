@@ -14,17 +14,21 @@
         try
         {
             $type = $_GET['type'];
-            if($type == 'register')
+            if($type == 'Register')
             {
                 register();
             }
-            elseif ($type == 'login')
+            elseif ($type == 'Login')
             {
                 login();
             }
-            elseif ($type == 're-login')
+            elseif ($type == 'Relogin')
             {
                 relogin();
+            }
+            elseif ($type == 'FindUser')
+            {
+                findUser();
             }
             else
             {
@@ -163,7 +167,7 @@
         VALUES (NULL, ?, ?, ?, NULL, ?, ?, ?, ?);";
         $stmt =$liga->prepare($sql);
         $stmt-> bind_param( "sssssss",$user_type, $username,
-            $hashpassword, $name, $email, $birthday, $profilepic );
+            $hashpassword, $profilepic, $name, $email, $birthday);
 
         if ($stmt->execute())
         {
@@ -171,13 +175,25 @@
             $userid = $stmt->insert_id;
             $token = generatetoken($userid);
 
-            echo json_encode([
-                "message" => "Account created successfully",
-                "token" => $token,
-                "type" => $user_type,
-                "username" => $username,
-                "userid" => $userid
-            ]);
+            $sqltoken = "INSERT INTO `usertoken` (`userid`, `token`) VALUES (?, ?)";
+            $stmttoken = $liga->prepare($sqltoken);
+            $stmttoken-> bind_param("ss", $userid, $token);
+
+            if ($stmttoken->execute())
+            {
+                echo json_encode([
+                    "message" => "Account created successfully",
+                    "token" => $token,
+                    "type" => $user_type,
+                    "username" => $username,
+                    "userid" => $userid
+                ]);
+            }
+            else
+            {
+                echo json_encode(["message" => "Error creating Tokens", "Error" => $stmttoken->error]);
+            }
+
         }
         else
         {
@@ -185,12 +201,10 @@
         }
     }
 
-
-    //login function (similar to register so fewer details)
+    //login function (similar to register so fewer details on comments)
     function login()
     {
         global $liga;
-
 
         //grab info from js
         $username = $_POST['log-user'];
@@ -216,14 +230,28 @@
                 //define user type
                 $user_type = $user['user_type'];
 
-                echo json_encode([
-                    "message" => "Logged in successfully",
-                    "token" => $token,
-                    "type" => $user_type,
-                    "username" => $user['username'],
-                    "userid" => $user['userid']
+                //change token n shit
+                $sqltoken = "UPDATE `usertoken` SET `token` = ? WHERE `usertoken`.`userid` = ?";
+                $stmttoken = $liga->prepare($sqltoken);
+                $stmttoken-> bind_param("ss", $token , $user['userid']);
 
-                ]);
+                if ($stmttoken->execute())
+                {
+                    echo json_encode([
+                        "message" => "Logged in successfully",
+                        "token" => $token,
+                        "type" => $user_type,
+                        "username" => $user['username'],
+                        "userid" => $user['userid']
+
+                    ]);
+                }
+                else
+                {
+                    echo json_encode(["message" => "Error creating Tokens", "Error" => $stmttoken->error]);
+                }
+
+
             }
             else
             {
@@ -236,7 +264,35 @@
         }
     }
 
-    function relogin()
+
+    //find the username through the token in local storage
+    function finduser()
     {
+        global $liga;
+
         $token = file_get_contents("php://input");
+
+        $query = "SELECT users.username FROM users INNER JOIN usertoken on usertoken.userid = users.userid WHERE usertoken.token = ?";
+        $stmt = $liga -> prepare($query);
+        $stmt -> bind_param("s", $token);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if($result -> num_rows > 0)
+        {
+            $user = $result->fetch_assoc();
+
+            echo json_encode([
+                "message" => "Got username sucessfully",
+                "token" => $token,
+                "username" => $user['username']
+
+            ]);
+
+        }
+        else
+        {
+             echo json_encode(["message" => "User not Found"]);
+        }
+
     }

@@ -2,7 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome Back</title>
+    <title id="Tittle">Welcome Back</title>
+    <script>
+        function AdditionalVerification()
+        {
+            var authtoken = localStorage.getItem('authToken');
+            var usertoken = sessionStorage.getItem('username');
+            if ((!authtoken && !usertoken) || (!authtoken && usertoken) || (authtoken && !usertoken))
+            {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = 'loginuser.html';
+            }
+
+        }
+    </script>
 </head>
 <body>
 

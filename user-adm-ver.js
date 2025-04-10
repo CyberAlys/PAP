@@ -1,13 +1,14 @@
 //functioon to check the login
-function checklogin()
+function CheckLogin()
 {
     //get the tokens
     var authtoken = localStorage.getItem('authToken');
     var usertoken= sessionStorage.getItem('username');
+    var idtoken = sessionStorage.getItem("userid");
 
-    if(!usertoken && authtoken)
+    if(!usertoken && !idtoken && authtoken)
     {
-        fetch('login.php?type=FindUserandId', {
+        fetch('login.php?type=FindUser', {
             method: 'POST' ,
             body: authtoken
          })
@@ -20,13 +21,16 @@ function checklogin()
             .then(data => {
                 if (data.token && data.username) {
 
-                    // Store tokens in localStorage
-                    sessionStorage.setItem('userid', data.userid);
+                    // Store token in localStorage
+                    sessionStorage.setItem('username', data.username);
 
                     // Verify if localStorage was set
                     console.log("localStorage set:", {
-                        userid: sessionStorage.getItem('userid')
+                        username: localStorage.getItem('username'),
                     });
+
+                    //I used this to test it
+                    //alert(data.username);
 
                     //going to the new webpage
                     window.location.href = 'ReLogin.html';
@@ -36,17 +40,27 @@ function checklogin()
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error logging in: ' + error.message);
+                alert('Error grabbing username: ' + error.message);
             });
     }
-    if(!authtoken && !usertoken)
+    if(!authtoken && !usertoken && !idtoken)
     {
+        localStorage.clear();
+        sessionStorage.clear();
         window.location.href = 'loginuser.html';
     }
 
 }
 
-function checkusertype()
+function CheckIfUser()
 {
-
+    var typetoken = sessionStorage.getItem('type');
+    if(typetoken == "user")
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }

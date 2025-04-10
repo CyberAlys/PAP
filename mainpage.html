@@ -3,9 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>The Photographer</title>
+    <script src="user-adm-ver.js"> </script>
 </head>
-<body>
-    <h1>ÉS USER CHAVALO</h1>
+<body onload="CheckLogin()">
     <img src="https://i.pinimg.com/236x/e2/49/b4/e249b4aa7a9177dafb5b5c01a38ef854.jpg">
+
+    <H1 id="test usertype"></H1>
+    <script>
+        if (CheckIfUser())
+        {
+            document.getElementById("test usertype").innerHTML = "You're a User";
+        }
+        else if (!CheckIfUser())
+        {
+            document.getElementById("test usertype").innerHTML = "You're a Adm";
+        }
+    </script>
 </body>
 </html>

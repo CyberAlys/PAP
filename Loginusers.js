@@ -59,7 +59,7 @@ function showPasswordreg()
     function RegisterPHP(formdata)
     {
         //call login.php and send trough GET the type register, inserts formdata trough POST
-        fetch('login.php?type=register', {
+        fetch('login.php?type=Register', {
             method: 'POST',
             body: formdata
         })
@@ -120,7 +120,7 @@ function showPasswordreg()
     const formData = new FormData(document.getElementById('login'));
 
         //call ajax
-    fetch('login.php?type=login',
+    fetch('login.php?type=Login',
         {method: 'POST',
             body: formData
     })
@@ -133,7 +133,7 @@ function showPasswordreg()
         .then(data => {
             if (data.token && data.username) {
 
-                // Store tokens in localStorage
+                // Store tokens in localStorage or in SessionStorage
                 localStorage.setItem('authToken', data.token);
                 sessionStorage.setItem('type', data.type);
                 sessionStorage.setItem('username', data.username);

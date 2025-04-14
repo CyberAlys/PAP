@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title id="Tittle">Welcome Back</title>
+    <script src="Loginusers.js"></script>
     <script>
         function AdditionalVerification()
         {
@@ -14,11 +15,22 @@
                 sessionStorage.clear();
                 window.location.href = 'loginuser.html';
             }
+            else
+            {
+                document.getElementById("text").innerHTML = "Welcome back " + usertoken;
+            }
 
         }
+
     </script>
 </head>
-<body>
+<body onload="AdditionalVerification();">
+    <h1 id="text" style="text-align: center"></h1>
+    <form onsubmit="return ReLoginPHP()">
+        <input type="password" placeholder="Password" id="Relog-Pass" name="Relog-Pass" minlength="6" maxlength="30" required>
+        <input type="submit"> <br>
+        <input type="button" value="Show Password" id="showpassrelog" onclick="showPasswordrelog()"> <br>
 
+    </form>
 </body>
 </html>

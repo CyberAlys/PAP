@@ -32,6 +32,20 @@ function showPasswordreg()
         confpass.type = "password";
     }
 }
+function showPasswordrelog()
+{
+    var pass = document.getElementById("Relog-Pass");
+
+    if (pass.type === "password")
+    {
+        pass.type = "text";
+    }
+    else
+    {
+        pass.type = "password";
+    }
+}
+
 
 //switches the form from the log in to the register
     function showregitser()
@@ -160,3 +174,58 @@ function showPasswordreg()
 
         return false;
     }
+
+function ReLoginPHP()
+{
+    var username = sessionStorage.getItem('username');
+    var pass = document.getElementById('Relog-Pass');
+    const data =
+    {
+        user: username,
+        pass: pass
+    }
+    //call ajax
+    fetch('login.php?type=Relogin',
+        {method: 'POST',
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.token && data.username) {
+
+                //clean local and session storage
+                localStorage.clear();
+                sessionStorage.clear();
+
+                // Store tokens in localStorage or in SessionStorage
+                localStorage.setItem('authToken', data.token);
+                sessionStorage.setItem('type', data.type);
+                sessionStorage.setItem('username', data.username);
+                sessionStorage.setItem('userid', data.userid);
+
+                // Verify if localStorage was set
+                console.log("localStorage set:", {
+                    token: localStorage.getItem('authToken'),
+                    type: localStorage.getItem('type'),
+                    username: localStorage.getItem('username'),
+                    userid: sessionStorage.getItem('userid')
+                });
+
+                //going to the new webpage
+                window.location.href = 'mainpage.html';
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error logging in: ' + error.message);
+        });
+
+    return false;
+}

@@ -296,3 +296,65 @@
         }
 
     }
+
+    function relogin()
+    {
+        global $liga;
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $username = $input['user'];
+        $pass = $input['pass'];
+
+        //query stuff
+        $sql = "SELECT * FROM users WHERE username = ?";
+
+        $stmt = $liga -> prepare($sql);
+        $stmt ->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        //if match for username is found
+        if($result -> num_rows > 0)
+        {
+            $user = $result->fetch_assoc();
+            //password_verify checks if the password inputted by the user matches with the hash that the DB provides
+            if(password_verify($pass, $user['password']))
+            {
+                $token = generatetoken($user['userid']);
+
+                //define user type
+                $user_type = $user['user_type'];
+
+                //change token n shit
+                $sqltoken = "UPDATE `usertoken` SET `token` = ? WHERE `usertoken`.`userid` = ?";
+                $stmttoken = $liga->prepare($sqltoken);
+                $stmttoken-> bind_param("ss", $token , $user['userid']);
+
+                if ($stmttoken->execute())
+                {
+                    echo json_encode([
+                        "message" => "Logged in successfully",
+                        "token" => $token,
+                        "type" => $user_type,
+                        "username" => $user['username'],
+                        "userid" => $user['userid']
+
+                    ]);
+                }
+                else
+                {
+                    echo json_encode(["message" => "Error creating Tokens", "Error" => $stmttoken->error]);
+                }
+
+
+            }
+            else
+            {
+                echo json_encode(["message" => "Wrong Password"]);
+            }
+        }
+        else
+        {
+            echo json_encode(["message" => "User not found"]);
+        }
+    }

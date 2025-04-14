@@ -25,8 +25,8 @@ function CheckLogin()
                     sessionStorage.setItem('username', data.username);
 
                     // Verify if localStorage was set
-                    console.log("localStorage set:", {
-                        username: localStorage.getItem('username'),
+                    console.log("SessionStorage set:", {
+                        username: sessionStorage.getItem('username'),
                     });
 
                     //I used this to test it

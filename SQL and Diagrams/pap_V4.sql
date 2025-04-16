@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 14-Mar-2025 às 09:09
+-- Tempo de geração: 16-Abr-2025 às 15:00
 -- Versão do servidor: 10.4.32-MariaDB
 -- versão do PHP: 8.2.12
 
@@ -85,7 +85,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`userid`, `user_type`, `username`, `password`, `AdmPin`, `profilepic`, `name`, `email`, `birthday`) VALUES
-(1, 'user', 'Aba', '$2y$10$cjl457nz4s80cIEdXn8.sOqmzMauDPOtWe.xdMYFblBYpCRRcCXKi', NULL, 'mari', 'maria@gmail.com', '2004-02-10', '0000-00-00');
+(1, 'user', 'Aba', '$2y$10$eOAfAKfoSPeR9ldQ8pKyWOFGpeWylb3gWQmsJ3v00WU7aE1EqlfRq', NULL, 'photos/profile_pictures/Default_pfp.jpg', 'maria', 'maria@gmail.com', '2004-05-26'),
+(2, 'adm', 'maria', '$2y$10$u324UtiLqhhlA9CNP4JmGuXq3i8F9uS6pxGDHUro48DMrtmyvPyuO', 211205, 'photos/profile_pictures/Default_pfp.jpg', 'maria', 'mariarita@gmail.com', '2003-06-09');
 
 -- --------------------------------------------------------
 
@@ -95,8 +96,16 @@ INSERT INTO `users` (`userid`, `user_type`, `username`, `password`, `AdmPin`, `p
 
 CREATE TABLE `usertoken` (
   `userid` int(11) NOT NULL,
-  `token` int(11) NOT NULL
+  `token` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Extraindo dados da tabela `usertoken`
+--
+
+INSERT INTO `usertoken` (`userid`, `token`) VALUES
+(1, '142084b48c533f5b08763eb4ed7346c0057fc176ce84028c0a1e31491ee585f3'),
+(2, 'c34550d84a48cbe2042a1761df72a1ac69626d992e6efe5a72b153a05b19bc8e');
 
 --
 -- Índices para tabelas despejadas
@@ -114,7 +123,8 @@ ALTER TABLE `comment`
 -- Índices para tabela `likes`
 --
 ALTER TABLE `likes`
-  ADD PRIMARY KEY (`userid`,`photoid`);
+  ADD PRIMARY KEY (`userid`,`photoid`),
+  ADD KEY `photoid` (`photoid`);
 
 --
 -- Índices para tabela `photos`
@@ -134,7 +144,7 @@ ALTER TABLE `users`
 -- Índices para tabela `usertoken`
 --
 ALTER TABLE `usertoken`
-  ADD KEY `user` (`userid`);
+  ADD PRIMARY KEY (`userid`);
 
 --
 -- AUTO_INCREMENT de tabelas despejadas
@@ -156,7 +166,7 @@ ALTER TABLE `photos`
 -- AUTO_INCREMENT de tabela `users`
 --
 ALTER TABLE `users`
-  MODIFY `userid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `userid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restrições para despejos de tabelas
@@ -166,27 +176,27 @@ ALTER TABLE `users`
 -- Limitadores para a tabela `comment`
 --
 ALTER TABLE `comment`
-  ADD CONSTRAINT `responsephoto` FOREIGN KEY (`responseid`) REFERENCES `photos` (`photoid`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `usercomment` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `responsephoto` FOREIGN KEY (`responseid`) REFERENCES `photos` (`photoid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `usercomment` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Limitadores para a tabela `likes`
 --
 ALTER TABLE `likes`
-  ADD CONSTRAINT `photoid` FOREIGN KEY (`photoid`) REFERENCES `photos` (`photoid`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `photoid` FOREIGN KEY (`photoid`) REFERENCES `photos` (`photoid`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `userlike` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Limitadores para a tabela `photos`
 --
 ALTER TABLE `photos`
-  ADD CONSTRAINT `fk_user` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_user` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Limitadores para a tabela `usertoken`
 --
 ALTER TABLE `usertoken`
-  ADD CONSTRAINT `user` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `user` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

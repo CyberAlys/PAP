@@ -317,6 +317,7 @@
         if($result -> num_rows > 0)
         {
             $user = $result->fetch_assoc();
+
             //password_verify checks if the password inputted by the user matches with the hash that the DB provides
             if(password_verify($pass, $user['password']))
             {

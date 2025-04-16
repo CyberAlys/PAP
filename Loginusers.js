@@ -2,7 +2,7 @@
 //switches the password input type for a text input type in the log in form
 function showPasswordlogin()
     {
-        var pass = document.getElementById("log-password");
+        const pass = document.getElementById("log-password");
 
         if (pass.type === "password")
         {
@@ -18,8 +18,8 @@ function showPasswordlogin()
 //same as the above but for the register
 function showPasswordreg()
 {
-    var pass = document.getElementById("Reg-Password");
-    var confpass = document.getElementById("Reg-confPass");
+    const pass = document.getElementById("Reg-Password");
+    const confpass = document.getElementById("Reg-confPass");
 
     if (pass.type === "password")
     {
@@ -34,7 +34,7 @@ function showPasswordreg()
 }
 function showPasswordrelog()
 {
-    var pass = document.getElementById("Relog-Pass");
+    let pass = document.getElementById("Relog-Pass");
 
     if (pass.type === "password")
     {
@@ -177,8 +177,8 @@ function showPasswordrelog()
 
 function ReLoginPHP()
 {
-    var username = sessionStorage.getItem('username');
-    var pass = document.getElementById('Relog-Pass');
+    const username = sessionStorage.getItem('username');
+    const pass = document.getElementById('Relog-Pass').value;
     const data =
     {
         user: username,

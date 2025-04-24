@@ -4,11 +4,16 @@
     <meta charset="UTF-8">
     <title>The Photographer</title>
     <script src="user-adm-ver.js"> </script>
+    <script src="photos.js"> </script>
 </head>
+
 <body onload="CheckLogin()">
     <img src="https://i.pinimg.com/236x/e2/49/b4/e249b4aa7a9177dafb5b5c01a38ef854.jpg">
 
     <H1 id="test usertype"></H1>
+
+    <button onClick="changetouploadpage()">Upload picture</button>
+
     <script>
         if (CheckIfUser())
         {
@@ -18,6 +23,7 @@
         {
             document.getElementById("test usertype").innerHTML = "You're a Adm";
         }
+
     </script>
 </body>
 </html>

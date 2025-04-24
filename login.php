@@ -326,7 +326,7 @@
                 //define user type
                 $user_type = $user['user_type'];
 
-                //change token n shit
+                //change the tokens
                 $sqltoken = "UPDATE `usertoken` SET `token` = ? WHERE `usertoken`.`userid` = ?";
                 $stmttoken = $liga->prepare($sqltoken);
                 $stmttoken-> bind_param("ss", $token , $user['userid']);

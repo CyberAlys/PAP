@@ -1,4 +1,4 @@
-//functioon to check the login
+//function to check the login
 function CheckLogin()
 {
     //get the tokens
@@ -52,6 +52,7 @@ function CheckLogin()
 
 }
 
+//cheks the user type and returns true if user, false if adm
 function CheckIfUser()
 {
     var typetoken = sessionStorage.getItem('type');

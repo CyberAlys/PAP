@@ -26,9 +26,9 @@
 </head>
 <body onload="AdditionalVerification();">
     <h1 id="text" style="text-align: center"></h1>
-    <form onsubmit="return ReLoginPHP()">
+    <form onsubmit="return ReLoginPHP()" method="post">
         <input type="password" placeholder="Password" id="Relog-Pass" name="Relog-Pass" minlength="6" maxlength="30" required>
-        <input type="submit"> <br>
+        <input type="submit" value="Log-In"> <br>
         <input type="button" value="Show Password" id="showpassrelog" onclick="showPasswordrelog()"> <br>
 
     </form>

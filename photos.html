@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Photos</title>
-    <script src="user-adm-ver.js"></script>
     <script src="photos.js" ></script>
+    <script src="user-adm-ver.js"></script>
 </head>
-<body>
+<body onload="CheckLogin()">
 
     <form id="photoupload" onsubmit="uploadpicturetophp(event)">
         <label for="Tittle">Insert A Tittle</label>

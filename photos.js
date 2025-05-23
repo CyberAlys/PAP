@@ -1,6 +1,5 @@
 function changetouploadpage()
 {
-
     sessionStorage.setItem('phototype', 'upload');
     window.location.href = 'photos.html';
 }
@@ -82,4 +81,45 @@ function uploadpicturetophp(e) {
  };
 
  reader.readAsDataURL(file);
+}
+
+function handlePhotoSubmit(e) {
+    e.preventDefault(); // Prevent page reload
+    const id = document.getElementById('numbers').value;
+    loadPhotoDetails(id);
+}
+
+function loadPhotoDetails(photoId, containerSelector = "#photo-container") {
+    if (!photoId) {
+        alert("No photo ID provided.");
+        return;
+    }
+
+    fetch('photos.php?type=getphoto', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ photoid: photoId })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success === "Yes") {
+                const container = document.querySelector(containerSelector);
+                if (!container) return;
+
+                container.innerHTML = `
+                    <img src="${data.path}" alt="${data.title}" />
+                    <h2>${data.title}</h2>
+                    <p>${data.description}</p>
+                    <p>Size: ${data.width} x ${data.height}</p>
+                `;
+            } else {
+                alert(data.message || "Failed to load photo.");
+            }
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            alert("Error fetching photo.");
+        });
 }

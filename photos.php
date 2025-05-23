@@ -19,9 +19,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
         {
             saveinserver();
         }
-        elseif ($type == 'Login')
+        elseif ($type == 'getphoto')
         {
-            login();
+            getphoto();
         }
         elseif ($type == 'Relogin')
         {
@@ -91,6 +91,8 @@ function saveinserver()
 
         $uploadPath = __DIR__ . '/photos/images/' . $filename;
         file_put_contents($uploadPath, $photoData);
+
+        $sqlpath = '/photos/images/' . $filename;
     }
     else {
     throw new Exception('Did not receive a valid base64 image');}
@@ -99,7 +101,7 @@ function saveinserver()
     $sql = "INSERT INTO `photos` (`photoid`, `userid`, `filepath`, `width`, `height`, `filetype`, `title`, `description`, `uploaddate`) 
         VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?);";
     $stmt =$liga->prepare($sql);
-    $stmt-> bind_param( "ssssssss",$user, $uploadPath, $width, $height, $ext, $safetitle, $description, $uploadDate );
+    $stmt-> bind_param( "ssssssss",$user, $sqlpath, $width, $height, $ext, $safeTitle, $description, $uploadDate );
 
     if ($stmt->execute())
     {
@@ -114,4 +116,42 @@ function saveinserver()
     {
         echo json_encode(["message" => "Error uploading Image", "Error"=> $stmt->error]);
     }
+}
+
+function getphoto() {
+    global $liga;
+
+    $input = json_decode(file_get_contents("php://input"), true);
+    $id = $input['photoid'] ?? null;
+
+    if (!$id || !is_numeric($id)) {
+        echo json_encode(["success" => "No", "message" => "Invalid photo ID"]);
+        return;
+    }
+
+    if (!$id) {
+        echo json_encode(["success" => "No", "message" => "No photo ID provided"]);
+        return;
+    }
+
+    $sql = "SELECT filepath, title, description, width, height FROM photos WHERE photoid = ?";
+    $stmt = $liga->prepare($sql);
+    $stmt->bind_param("s", $id);
+    $stmt->execute();
+    $stmt->bind_result($path, $title, $description, $width, $height);
+
+    if ($stmt->fetch()) {
+        echo json_encode([
+            "success" => "Yes",
+            "path" => $path,
+            "title" => $title,
+            "description" => $description,
+            "width" => $width,
+            "height" => $height
+        ]);
+    } else {
+        echo json_encode(["success" => "No", "message" => "Photo not found"]);
+    }
+
+    $stmt->close();
 }

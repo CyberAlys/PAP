@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Display photos</title>
+  <script src="photos.js"></script>
+</head>
+<body>
+
+<form onsubmit="handlePhotoSubmit(event)">
+  <input type="number" id="numbers">
+  <input type="submit">
+</form>
+
+<div id="photo-container">
+  <img id="displayed-photo" src="" alt="Loading photo..." />
+  <h2 id="photo-title"></h2>
+  <p id="photo-description"></p>
+  <p id="photo-dimensions"></p>
+</div>
+</body>
+</html>

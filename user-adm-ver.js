@@ -36,6 +36,12 @@ function CheckLogin()
                     window.location.href = 'ReLogin.html';
                 } else {
                     alert(data.message);
+                    if(data.message === "User not Found")
+                    {
+                        sessionStorage.clear();
+                        localStorage.clear();
+                        window.location.href = 'loginuser.html';
+                    }
                 }
             })
             .catch(error => {
@@ -56,12 +62,5 @@ function CheckLogin()
 function CheckIfUser()
 {
     var typetoken = sessionStorage.getItem('type');
-    if(typetoken == "user")
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return typetoken === "user";
 }

@@ -1,97 +1,126 @@
+
 function changetouploadpage()
 {
     sessionStorage.setItem('phototype', 'upload');
     window.location.href = 'photos.html';
 }
+function toggleImageUpload() {
+    const imageSection = document.getElementById("image-section");
+    imageSection.style.display = imageSection.style.display === "none" ? "block" : "none";
+
+    const imgInput = document.getElementById("img");
+    if (imageSection.style.display === "none") {
+        // clear file input
+        imgInput.value = "";
+    }
+}
 function uploadpicturetophp(e) {
- e.preventDefault();
+    e.preventDefault();
 
- const title = document.getElementById("Tittle").value;
- const descript = document.getElementById("description").value;
- const fileInput = document.getElementById("img");
- const file = fileInput.files[0];
+    const userid = sessionStorage.getItem("userid");
 
- //basic checks for missing file, size and type
- if (!file) {
-  alert("No image selected!");
-  return;
- }
-
- const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
- const maxSize = 70 * 1024 * 1024; // 70 MB
-
-     if (!allowedTypes.includes(file.type)) {
-        alert("Only JPG, PNG, or GIF images are allowed.");
+    const textInput = document.getElementById("text");
+    if (!textInput) {
+        alert("Post input field not found.");
         return;
     }
+    const text = textInput.value;
 
-    if (file.size > maxSize) {
-        alert("Image is too large. Please select one under 70MB.");
-        return;
+    // Check if image section is visible
+    if (document.getElementById("image-section").style.display !== "none") {
+        const fileInput = document.getElementById("img");
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert("No image selected!");
+            return;
+        }
+
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        const maxSize = 70 * 1024 * 1024; // 70 MB
+
+        if (!allowedTypes.includes(file.type)) {
+            alert("Only JPG, PNG, or GIF images are allowed.");
+            return;
+        }
+
+        if (file.size > maxSize) {
+            alert("Image is too large. Please select one under 70MB.");
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            const img = new Image();
+
+            img.onload = function () {
+                const width = img.width;
+                const height = img.height;
+
+                const data = {
+                    usrid: userid,
+                    istherephoto: true,
+                    photo: e.target.result,
+                    text: text,
+                    imagewidth: width,
+                    imageheight: height
+                };
+
+                sendToServer(data); // call the fetch directly
+            };
+
+            img.src = e.target.result;
+        };
+
+        reader.readAsDataURL(file);
+    } else {
+        const data = {
+            usrid: userid,
+            istherephoto: false,
+            text: text
+        };
+
+        sendToServer(data); // same as above
     }
- const reader = new FileReader();
 
- reader.onload = function (e) {
-  const img = new Image();
-
-  img.onload = function () {
-   const width = img.width;
-   const height = img.height;
-
-   const userid = sessionStorage.getItem("userid");
-   const data =
-       {
-        usrid: userid,
-        photoTitle : title,
-        photo : e.target.result,
-        description : descript,
-        imagewidth : width,
-        imageheight : height
-       };
-      fetch('photos.php?type=saveinserver',
-          {method: 'POST',
-              body: JSON.stringify(data)
-          })
-          .then(response => {
-              if (!response.ok) {
-                  throw new Error('Network response was not ok');
-              }
-              return response.json();
-          })
-          //to be done after php
-          .then(data => {
-              if (data.success === "Yes") {
-
-                  //going to the new webpage
-                  window.location.href = 'mainpage.html';
-              } else {
-                  alert(data.message);
-              }
-          })
-          .catch(error => {
-              console.error('Error:', error);
-              alert('Error uploading message: ' + error.message);
-          });
-
-      return false;
-
-  };
-
-  img.src = e.target.result;
- };
-
- reader.readAsDataURL(file);
+    return false;
 }
 
-function handlePhotoSubmit(e) {
+// Separate function to send data to PHP
+function sendToServer(data) {
+    fetch('photos.php?type=saveinserver', {
+        method: 'POST',
+        body: JSON.stringify(data)
+    })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            if (data.success === "Yes") {
+                window.location.href = 'mainpage.html';
+            } else {
+                alert(data.message || "Upload failed.");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error uploading message: ' + error.message);
+        });
+}
+
+function IDSubmit(e) {
     e.preventDefault(); // Prevent page reload
     const id = document.getElementById('numbers').value;
-    loadPhotoDetails(id);
+
+    sessionStorage.setItem("postId", id);
+    window.location.href = 'photodisplay.html';
 }
 
-function loadPhotoDetails(photoId, containerSelector = "#photo-container") {
-    if (!photoId) {
-        alert("No photo ID provided.");
+function loadPhotoDetails(postId, containerSelector = "#post-container") {
+    if (!postId) {
+        alert("No post ID provided.");
         return;
     }
 
@@ -100,7 +129,7 @@ function loadPhotoDetails(photoId, containerSelector = "#photo-container") {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ photoid: photoId })
+        body: JSON.stringify({ postid: postId })
     })
         .then(res => res.json())
         .then(data => {
@@ -108,18 +137,36 @@ function loadPhotoDetails(photoId, containerSelector = "#photo-container") {
                 const container = document.querySelector(containerSelector);
                 if (!container) return;
 
-                container.innerHTML = `
-                    <img src="${data.path}" alt="${data.title}" />
-                    <h2>${data.title}</h2>
-                    <p>${data.description}</p>
-                    <p>Size: ${data.width} x ${data.height}</p>
-                `;
+                const pfp = container.querySelector("#OP-pfp");
+                const name = container.querySelector("#OP-name");
+                const text = container.querySelector("#post-text");
+                const photoContainer = container.querySelector("#photo-container");
+                const photo = container.querySelector("#displayed-photo");
+                const dimensions = container.querySelector("#photo-dimensions");
+                const date = container.querySelector("#post-date");
+
+                // fill the fields in the divs
+                pfp.src = data.profilepic;
+                name.textContent = data.username;
+                text.textContent = data.text;
+                date.textContent = `Posted on ${data.date}`;
+
+                //if to see if there's a photo
+                if (data.photo === true) {
+                    photo.src = data.path;
+                    photo.alt = "Uploaded photo";
+                    dimensions.textContent = `Size: ${data.width} x ${data.height}`;
+                    photoContainer.style.display = "block";
+                } else {
+                    photoContainer.style.display = "none";
+                }
+
             } else {
-                alert(data.message || "Failed to load photo.");
+                alert(data.message || "Failed to load post.");
             }
         })
         .catch(err => {
             console.error("Error:", err);
-            alert("Error fetching photo.");
+            alert("Error fetching post.");
         });
 }

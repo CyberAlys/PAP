@@ -38,120 +38,203 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
     }
     catch (Exception $e)
     {
-        echo json_encode(["message" => "Server Error", "Error"]);
+        echo json_encode(["message" => $e->getMessage()]);
     }
 }
 
+
+//saves the post in the server storage and in the database
 function saveinserver()
 {
+    try {
+
     //grab $liga from connection.php
     global $liga;
-
 
     //grab info from form
     $input = json_decode(file_get_contents('php://input'), true);
     $user = $input['usrid'];
-    $title = $input['photoTitle'];
-    $photo = $input['photo'];
-    $description = $input['description'];
-    $width = $input['imagewidth'];
-    $height = $input['imageheight'];
+    $text = $input['text'];
 
-    //check if $photo is actually an image and put the image into $photo and the type into $type
-    if (preg_match('/^data:image\/(\w+);base64,/', $photo, $type)) {
+    $postdate = date('Y-m-d H:i:s');
 
-        //removes the first part of the string (data:image/png;base64,) so $photoData keeps only the raw data
-        $photoData = substr($photo, strpos($photo, ',') + 1);
-        //decodes the data
-        $photoData = base64_decode($photoData);
+    if($input['istherephoto'] == true) {
 
-        //decode verification
-        if ($photoData === false) {
-            throw new Exception('Base64 decode failed');
+        $photo = $input['photo'];
+        $width = $input['imagewidth'];
+        $height = $input['imageheight'];
+
+        //check if $photo is actually an image and put the image into $photo and the type into $type
+        if (preg_match('/^data:image\/(\w+);base64,/', $photo, $type)) {
+
+            //removes the first part of the string (data:image/png;base64,) so $photoData keeps only the raw data
+            $photoData = substr($photo, strpos($photo, ',') + 1);
+            //decodes the data
+            $photoData = base64_decode($photoData);
+
+            //decode verification
+            if ($photoData === false) {
+                throw new Exception('Base64 decode failed');
+            }
+
+            //checks if image is valid
+            $imageInfo = @getimagesizefromstring($photoData);
+            if ($imageInfo === false) {
+                throw new Exception('Uploaded data is not a valid image');
+            }
+
+            //get the extension from the array
+            $ext = strtolower($type[1]);
+
+            //check if the extension is valid
+            if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+                throw new Exception('Invalid image type');
+            }
+
+            $uploadDate = date('Ymd-his');
+            $filename = "{$user}_{$uploadDate}.{$ext}";
+
+            $uploadPath = __DIR__ . '/photos/images/' . $filename;
+            file_put_contents($uploadPath, $photoData);
+
+            $sqlpath = '/photos/images/' . $filename;
+
+        } else {
+            throw new Exception('Did not receive a valid base64 image');
         }
 
-        //checks if image is valid
-        $imageInfo = @getimagesizefromstring($photoData);
-        if ($imageInfo === false) {
-            throw new Exception('Uploaded data is not a valid image');
+        //query to insert and the statement that replaces the "?"'s
+        $sql = "INSERT INTO `photos` (`photoid`, `filepath`, `width`, `height`, `filetype`) 
+        VALUES (NULL, ?, ?, ?, ?);";
+        $stmt = $liga->prepare($sql);
+        $stmt->bind_param("ssss",  $sqlpath, $width, $height, $ext);
+
+        if ($stmt->execute()) {
+
+            $photoid = $stmt->insert_id;
+
+            $postsql = "INSERT INTO `post` (`postid`, `userid`, `text`, `date`, `photoid`) 
+            VALUES (NULL, ?, ?, ?, ?);";
+            $poststmt = $liga->prepare($postsql);
+            $poststmt->bind_param("sssi",  $user, $text, $postdate, $photoid);
+
+            if (!$poststmt->execute()) {
+                echo json_encode(["message" => "Error uploading Post", "Error" => $poststmt->error]);
+                return;
+            }
+
+
+        } else {
+            echo json_encode(["message" => "Error uploading Image", "Error" => $stmt->error]);
+            return;
         }
-
-        //get the extension from the array
-        $ext = strtolower($type[1]);
-
-        //check if the extension is valid
-        if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
-            throw new Exception('Invalid image type');
-        }
-
-        //takes some characters out of the title that could be dangerous
-        $safeTitle = preg_replace('/[^a-zA-Z0-9_-]/', '_', $title);
-        $uploadDate = date('Ymd');
-        $filename = "{$user}_{$uploadDate}_{$safeTitle}.{$ext}";
-
-        $uploadPath = __DIR__ . '/photos/images/' . $filename;
-        file_put_contents($uploadPath, $photoData);
-
-        $sqlpath = '/photos/images/' . $filename;
     }
     else {
-    throw new Exception('Did not receive a valid base64 image');}
+        $postsql = "INSERT INTO `post` (`postid`, `userid`, `text`, `date`, `photoid`) 
+         VALUES (NULL, ?, ?, ?, NULL );";
+        $poststmt = $liga->prepare($postsql);
+        $poststmt->bind_param("sss", $user, $text, $postdate);
 
-    //query to insert and the statement that replaces the "?"'s
-    $sql = "INSERT INTO `photos` (`photoid`, `userid`, `filepath`, `width`, `height`, `filetype`, `title`, `description`, `uploaddate`) 
-        VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?);";
-    $stmt =$liga->prepare($sql);
-    $stmt-> bind_param( "ssssssss",$user, $sqlpath, $width, $height, $ext, $safeTitle, $description, $uploadDate );
+        if (!$poststmt->execute()) {
+            echo json_encode(["message" => "Error uploading Post", "Error" => $poststmt->error]);
+            return;
 
-    if ($stmt->execute())
-    {
-
-            echo json_encode([
-                "message" => "Image uploaded successfully",
-                "success" => "Yes",
-                ]);
+        }
+    }
+        echo json_encode([
+            "message" => "Post uploaded successfully",
+            "success" => "Yes",
+        ]);
 
     }
-    else
+    catch (Exception $e)
     {
-        echo json_encode(["message" => "Error uploading Image", "Error"=> $stmt->error]);
+        echo json_encode(["message" => $e->getMessage()]);
     }
+
 }
 
-function getphoto() {
-    global $liga;
 
-    $input = json_decode(file_get_contents("php://input"), true);
-    $id = $input['photoid'] ?? null;
+//grabs the posts
+function getphoto()
+{
+    try {
+        global $liga;
 
-    if (!$id || !is_numeric($id)) {
-        echo json_encode(["success" => "No", "message" => "Invalid photo ID"]);
-        return;
+        $input = json_decode(file_get_contents("php://input"), true);
+        $id = $input['postid'] ?? null;
+
+        if (!$id || !is_numeric($id)) {
+            echo json_encode(["success" => "No", "message" => "Invalid photo ID"]);
+            return;
+        }
+
+        $sql_post = "SELECT userid, text, date, photoid FROM post WHERE postid = ?";
+        $stmt_post = $liga->prepare($sql_post);
+        $stmt_post->bind_param("s", $id);
+        $stmt_post->execute();
+        $stmt_post->bind_result($userid, $text, $date, $photoid);
+
+        if (!$stmt_post->fetch()) {
+            echo json_encode(["success" => "No", "message" => "Post not found"]);
+            $stmt_post->close();
+            return;
+        }
+        $stmt_post->close();
+
+        // Get user info
+        $sql_user = "SELECT username, profilepic FROM users WHERE userid = ?";
+        $stmt_user = $liga->prepare($sql_user);
+        $stmt_user->bind_param("s", $userid);
+        $stmt_user->execute();
+        $stmt_user->bind_result($username, $profilepic);
+
+        if (!$stmt_user->fetch()) {
+            echo json_encode(["success" => "No", "message" => "User not found"]);
+            $stmt_user->close();
+            return;
+        }
+        $stmt_user->close();
+
+        // No photo
+        if (is_null($photoid)) {
+            echo json_encode([
+                "success" => "Yes",
+                "photo" => false,
+                "text" => $text,
+                "date" => $date,
+                "username" => $username,
+                "profilepic" => $profilepic
+            ]);
+            return;
+        }
+
+        // Get photo info
+        $sql_photo = "SELECT filepath, width, height FROM photos WHERE photoid = ?";
+        $stmt_photo = $liga->prepare($sql_photo);
+        $stmt_photo->bind_param("i", $photoid);
+        $stmt_photo->execute();
+        $stmt_photo->bind_result($path, $width, $height);
+
+        if ($stmt_photo->fetch()) {
+            echo json_encode([
+                "success" => "Yes",
+                "photo" => true,
+                "path" => $path,
+                "text" => $text,
+                "date" => $date,
+                "width" => $width,
+                "height" => $height,
+                "username" => $username,
+                "profilepic" => $profilepic
+            ]);
+        } else {
+            echo json_encode(["success" => "No", "message" => "Photo not found"]);
+        }
+
+        $stmt_photo->close();
+
+    } catch (Exception $e) {
+        echo json_encode(["message" => $e->getMessage()]);
     }
-
-    if (!$id) {
-        echo json_encode(["success" => "No", "message" => "No photo ID provided"]);
-        return;
-    }
-
-    $sql = "SELECT filepath, title, description, width, height FROM photos WHERE photoid = ?";
-    $stmt = $liga->prepare($sql);
-    $stmt->bind_param("s", $id);
-    $stmt->execute();
-    $stmt->bind_result($path, $title, $description, $width, $height);
-
-    if ($stmt->fetch()) {
-        echo json_encode([
-            "success" => "Yes",
-            "path" => $path,
-            "title" => $title,
-            "description" => $description,
-            "width" => $width,
-            "height" => $height
-        ]);
-    } else {
-        echo json_encode(["success" => "No", "message" => "Photo not found"]);
-    }
-
-    $stmt->close();
 }

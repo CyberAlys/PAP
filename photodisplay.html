@@ -4,19 +4,29 @@
   <meta charset="UTF-8">
   <title>Display photos</title>
   <script src="photos.js"></script>
+  <script>
+    function getphoto()
+    {
+      const id = sessionStorage.getItem("postId");
+      sessionStorage.removeItem("postId");
+
+      loadPhotoDetails(id);
+    }
+
+  </script>
 </head>
-<body>
 
-<form onsubmit="handlePhotoSubmit(event)">
-  <input type="number" id="numbers">
-  <input type="submit">
-</form>
+<body onload="getphoto()">
 
-<div id="photo-container">
-  <img id="displayed-photo" src="" alt="Loading photo..." />
-  <h2 id="photo-title"></h2>
-  <p id="photo-description"></p>
-  <p id="photo-dimensions"></p>
-</div>
+  <div id="post-container">
+    <label>Posted by</label> <img id="OP-pfp" src="" alt="Loading Photo..." style="width: 40px; height: 40px; border-radius: 50%;"/> <H3 id="OP-name"></H3>
+    <p id="post-text"></p>
+    <div id="photo-container">
+      <img id="displayed-photo" src="" alt="Loading photo..." />
+      <p id="photo-dimensions"></p>
+    </div>
+    <p id="post-date"> </p>
+  </div>
+
 </body>
 </html>

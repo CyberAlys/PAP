@@ -9,21 +9,29 @@
 </head>
 
 <body onload="CheckLogin()">
-    <img src="https://i.pinimg.com/236x/e2/49/b4/e249b4aa7a9177dafb5b5c01a38ef854.jpg">
 
+
+<center>
     <H1 id="test usertype"></H1>
+</center>
 
-    <button onClick="changetouploadpage()">Upload picture</button>
 
+    <button onClick="changetouploadpage()">Upload picture</button> <br>
+
+    <hr style="height: 5px; background-color: black; border: none;">
+
+    <div style="display: flex; flex-direction: column; height: 100vh;">
+        <iframe src="allphotos.html" style="flex-grow: 1; border: none;"></iframe>
+    </div>
 
     <script>
         if (CheckIfUser())
         {
-            document.getElementById("test usertype").innerHTML = "You're a User";
+            document.getElementById("test usertype").innerHTML = "The Photographer";
         }
         else if (!CheckIfUser())
         {
-            document.getElementById("test usertype").innerHTML = "You're a Adm";
+            document.getElementById("test usertype").innerHTML = "The Photographer (adm)";
         }
 
     </script>

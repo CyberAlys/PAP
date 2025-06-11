@@ -3,14 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <script src="photos.js"></script>
+    <script src="photos.js" defer></script>
+    <script>
+
+            document.addEventListener('DOMContentLoaded', () => {
+            loadFeed(); // calls your JS function
+
+            const feed = document.querySelector("#post-feed");
+            if (!feed) {
+            console.error("#post-feed not found!");
+            return;
+        }
+
+            feed.addEventListener("click", function (e) {
+            const postElement = e.target.closest(".post");
+            if (postElement && postElement.hasAttribute("data-postid")) {
+            const postId = postElement.getAttribute("data-postid");
+            console.log("Clicked post ID:", postId);
+
+            IDSubmit(postId);
+        }
+        });
+        });
+    </script>
+
+    <style>
+        #post-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .post {
+            border: 1px solid #ccc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: white;
+        }
+
+        .pfp {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .photo {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
 </head>
 <body>
 
-<form onsubmit="IDSubmit(event)">
-    <input type="number" id="numbers">
-    <input type="submit">
-</form>
+
+<!-- Hidden template -->
+<div class="post post-preview" id="post-template" style="display: none;">
+    <div class="user-info">
+        <img class="pfp" src="" alt="Profile Picture" />
+        <h3 class="username"></h3>
+    </div>
+    <p class="text"></p>
+    <div class="photo-container">
+        <img class="photo" src="" alt="Post Photo" />
+    </div>
+</div>
+
+<!-- Where posts will be inserted -->
+<div id="post-feed"></div>
 
 </body>
 </html>

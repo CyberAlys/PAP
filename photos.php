@@ -1,20 +1,23 @@
 <?php
 include("conexion.php");
 ini_set('display_errors', 1);
-
-//it suppresses errors from being displayed on the screen but error_reporting being on E_All ensures that errors are still detected
-ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 //defines the header it says that the response should be intreperted as JSON data
 header('Content-Type: application/json');
+
+DEFINE("logpath" ,   __DIR__ . "/logs/testlogs.log");
 
 //checks to see the type of operation (login or register or other operations)
 if($_SERVER['REQUEST_METHOD'] === 'POST')
 {
     try
     {
+
         $type = $_GET['type'];
+
+        error_log("type selector called with: " ."$type" ."\n", 3, logpath);
+
         if($type == 'saveinserver')
         {
             saveinserver();
@@ -23,14 +26,14 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
         {
             getphoto();
         }
-        elseif ($type == 'Relogin')
+        elseif ($type == 'getfeed')
         {
-            relogin();
+            getfeed();
         }
-        elseif ($type == 'FindUser')
-        {
-            findUser();
-        }
+//        elseif ($type == 'FindUser')
+//        {
+//           // findUser();
+//        }
         else
         {
             echo json_encode(["message" => "Invalid Action type"]);
@@ -46,6 +49,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 //saves the post in the server storage and in the database
 function saveinserver()
 {
+    error_log("saveinserver() called " ."\n", 3, logpath);
+
     try {
 
     //grab $liga from connection.php
@@ -92,7 +97,7 @@ function saveinserver()
             }
 
             $uploadDate = date('Ymd-his');
-            $filename = "{$user}_{$uploadDate}.{$ext}";
+            $filename = "{$user}_   {$uploadDate}.{$ext}";
 
             $uploadPath = __DIR__ . '/photos/images/' . $filename;
             file_put_contents($uploadPath, $photoData);
@@ -158,6 +163,9 @@ function saveinserver()
 //grabs the posts
 function getphoto()
 {
+    error_log("getphoto() called " ."\n", 3, logpath);
+
+
     try {
         global $liga;
 
@@ -169,6 +177,7 @@ function getphoto()
             return;
         }
 
+        //stuff for the post info
         $sql_post = "SELECT userid, text, date, photoid FROM post WHERE postid = ?";
         $stmt_post = $liga->prepare($sql_post);
         $stmt_post->bind_param("s", $id);
@@ -236,5 +245,85 @@ function getphoto()
 
     } catch (Exception $e) {
         echo json_encode(["message" => $e->getMessage()]);
+    }
+}
+
+
+//gets multiple posts to create the feed
+function getfeed()
+{
+    error_log("getfeed() called" . "\n", 3, logpath);
+    global $liga;
+
+    if (!$liga) {
+        die(json_encode(["success" => "No", "message" => "DB connection failed"]));
+    }
+
+    try {
+        $sql = "SELECT postid, userid, text, date, photoid FROM post ORDER BY date DESC LIMIT 20";
+        $stmt = $liga->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $posts = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $postid = $row['postid'];
+            $userid = $row['userid'];
+            $text = $row['text'];
+            $date = $row['date'];
+            $photoid = $row['photoid'];
+
+            // Get user info
+            $sql_user = "SELECT username, profilepic FROM users WHERE userid = ?";
+            $stmt_user = $liga->prepare($sql_user);
+            $stmt_user->bind_param("s", $userid);
+            $stmt_user->execute();
+            $stmt_user->bind_result($username, $profilepic);
+            $stmt_user->fetch();
+            $stmt_user->close();
+
+            $postData = [
+                "postid" => $postid,
+                "userid" => $userid,
+                "text" => $text,
+                "date" => $date,
+                "username" => $username,
+                "profilepic" => $profilepic,
+                "photo" => false
+            ];
+
+            if (!is_null($photoid)) {
+                $sql_photo = "SELECT filepath, width, height FROM photos WHERE photoid = ?";
+                $stmt_photo = $liga->prepare($sql_photo);
+                $stmt_photo->bind_param("i", $photoid);
+                $stmt_photo->execute();
+                $stmt_photo->bind_result($filepath, $width, $height);
+
+                if ($stmt_photo->fetch()) {
+                    $postData["photo"] = true;
+                    $postData["path"] = $filepath;
+                    $postData["width"] = $width;
+                    $postData["height"] = $height;
+                }
+
+                $stmt_photo->close();
+            }
+
+            $posts[] = $postData;
+        }
+
+        $stmt->close();
+
+        echo json_encode([
+            "success" => "Yes",
+            "posts" => $posts
+        ]);
+
+    } catch (Exception $e) {
+        echo json_encode([
+            "success" => "No",
+            "message" => $e->getMessage()
+        ]);
     }
 }

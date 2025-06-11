@@ -110,14 +110,13 @@ function sendToServer(data) {
         });
 }
 
-function IDSubmit(e) {
-    e.preventDefault(); // Prevent page reload
-    const id = document.getElementById('numbers').value;
+function IDSubmit(id) {
 
     sessionStorage.setItem("postId", id);
     window.location.href = 'photodisplay.html';
 }
 
+//grabs and loads all things of the post
 function loadPhotoDetails(postId, containerSelector = "#post-container") {
     if (!postId) {
         alert("No post ID provided.");
@@ -131,7 +130,9 @@ function loadPhotoDetails(postId, containerSelector = "#post-container") {
         },
         body: JSON.stringify({ postid: postId })
     })
-        .then(res => res.json())
+        .then(response => {
+            if (!response.ok) console.error('Network response was not ok');
+            return response.json();})
         .then(data => {
             if (data.success === "Yes") {
                 const container = document.querySelector(containerSelector);
@@ -169,4 +170,64 @@ function loadPhotoDetails(postId, containerSelector = "#post-container") {
             console.error("Error:", err);
             alert("Error fetching post.");
         });
+}
+
+//requests the info to create the feed and populates and clones the div
+function loadFeed() {
+    const page = 1;
+
+    console.log("js called");
+
+    fetch("photos.php?type=getfeed", {
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ page: page })
+    })
+        .then(response => {
+            if (!response.ok)  console.error('Network response was not ok');
+            return response.json();})
+        .then(data => {
+            if (data.success === "Yes" && Array.isArray(data.posts)) {
+                //grabs the div and puts into vars
+                const feed = document.querySelector("#post-feed");
+                const template = document.querySelector("#post-template");
+
+                //for each item in the array
+                data.posts.forEach(post => {
+                    //grabs template and clones it
+                    const clone = template.cloneNode(true);
+                    clone.style.display = "block";
+
+                    //stores the id
+                    clone.setAttribute("data-postid", post.postid);
+
+                    //populates clones
+                    clone.querySelector(".pfp").src = post.profilepic;
+                    clone.querySelector(".username").textContent = post.username;
+                    clone.querySelector(".text").textContent = post.text;
+
+                    //populate photos in case there's one if not hides the img
+                    if (post.photo) {
+                        const img = clone.querySelector(".photo");
+                        img.src = post.path;
+                        img.style.width = "300px";
+                        img.style.height = "300px";
+                    } else {
+                        clone.querySelector(".photo-container").remove(); // remove image box if no photo
+                    }
+
+                    feed.appendChild(clone);
+                });
+            }
+            else if(data.success === "No")
+            {
+                alert(data.message)
+            }
+        })
+    .catch(err => {
+         console.error("Failed to load feed:", err);
+         alert(err);
+    });
 }

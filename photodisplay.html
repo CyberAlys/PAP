@@ -14,12 +14,25 @@
     }
 
   </script>
+  <style>
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  </style>
 </head>
 
 <body onload="getphoto()">
 
+<button onclick="window.location.href='allphotos.html'"> <- go back </button>
+
   <div id="post-container">
-    <label>Posted by</label> <img id="OP-pfp" src="" alt="Loading Photo..." style="width: 40px; height: 40px; border-radius: 50%;"/> <H3 id="OP-name"></H3>
+    <div class="user-info">
+      <label>Posted by</label>
+      <img id="OP-pfp" src="" alt="Loading Photo..." style="width: 40px; height: 40px; border-radius: 50%"/>
+      <H3 id="OP-name"></H3>
+    </div>
     <p id="post-text"></p>
     <div id="photo-container">
       <img id="displayed-photo" src="" alt="Loading photo..." />

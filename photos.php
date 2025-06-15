@@ -16,7 +16,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 
         $type = $_GET['type'];
 
-        error_log("type selector called with: " ."$type" ."\n", 3, logpath);
+        error_log("[" . date('Y-m-d H:i:s') . "] type selector called with: " ."$type". "\n", 3, logpath);
 
         if($type == 'saveinserver')
         {
@@ -30,10 +30,18 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
         {
             getfeed();
         }
-//        elseif ($type == 'FindUser')
-//        {
-//           // findUser();
-//        }
+        elseif ($type == 'changelike')
+        {
+            changelike();
+        }
+        elseif($type == 'insertcomment')
+        {
+            insertcomment();
+        }
+        elseif($type == 'getcomments')
+        {
+            getcomments();
+        }
         else
         {
             echo json_encode(["message" => "Invalid Action type"]);
@@ -49,7 +57,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 //saves the post in the server storage and in the database
 function saveinserver()
 {
-    error_log("saveinserver() called " ."\n", 3, logpath);
+    error_log("[" . date('Y-m-d H:i:s') . "] saveinserver() called" . "\n", 3, logpath);
 
     try {
 
@@ -97,7 +105,7 @@ function saveinserver()
             }
 
             $uploadDate = date('Ymd-his');
-            $filename = "{$user}_   {$uploadDate}.{$ext}";
+            $filename = "{$user}_{$uploadDate}.{$ext}";
 
             $uploadPath = __DIR__ . '/photos/images/' . $filename;
             file_put_contents($uploadPath, $photoData);
@@ -150,10 +158,11 @@ function saveinserver()
             "message" => "Post uploaded successfully",
             "success" => "Yes",
         ]);
-
+        error_log("[" . date('Y-m-d H:i:s') . "] saveinserver() succeeded" . "\n", 3, logpath);
     }
     catch (Exception $e)
     {
+        error_log("[" . date('Y-m-d H:i:s') . "] saveinserver() failed" . "\n", 3, logpath);
         echo json_encode(["message" => $e->getMessage()]);
     }
 
@@ -163,7 +172,7 @@ function saveinserver()
 //grabs the posts
 function getphoto()
 {
-    error_log("getphoto() called " ."\n", 3, logpath);
+    error_log("[" . date('Y-m-d H:i:s') . "] getphoto() called" . "\n", 3, logpath);
 
 
     try {
@@ -171,6 +180,7 @@ function getphoto()
 
         $input = json_decode(file_get_contents("php://input"), true);
         $id = $input['postid'] ?? null;
+        $viwer = $input['viwerid'] ?? null;
 
         if (!$id || !is_numeric($id)) {
             echo json_encode(["success" => "No", "message" => "Invalid photo ID"]);
@@ -205,6 +215,23 @@ function getphoto()
         }
         $stmt_user->close();
 
+        //get like number
+        $sql_like = " SELECT COUNT(*) AS total_likes,
+                MAX(CASE WHEN userid = ? THEN 1 ELSE 0 END) AS user_liked
+                FROM likes WHERE postid = ?";
+
+        $stmt_like = $liga->prepare($sql_like);
+        $stmt_like->bind_param("ii", $viwer, $id);
+        $stmt_like->execute();
+        $stmt_like->bind_result($Likenumber, $viwerlike);
+
+        if (!$stmt_like->fetch()) {
+            echo json_encode(["success" => "No", "message" => "like not found"]);
+            $stmt_like->close();
+            return;
+        }
+        $stmt_like->close();
+
         // No photo
         if (is_null($photoid)) {
             echo json_encode([
@@ -213,8 +240,11 @@ function getphoto()
                 "text" => $text,
                 "date" => $date,
                 "username" => $username,
-                "profilepic" => $profilepic
+                "profilepic" => $profilepic,
+                "likenumber" => $Likenumber,
+                "viwerlike" => $viwerlike
             ]);
+            error_log("[" . date('Y-m-d H:i:s') . "] getphoto() no photo succeeded" . "\n", 3, logpath);
             return;
         }
 
@@ -235,15 +265,20 @@ function getphoto()
                 "width" => $width,
                 "height" => $height,
                 "username" => $username,
-                "profilepic" => $profilepic
+                "profilepic" => $profilepic,
+                "likenumber" => $Likenumber,
+                "viwerlike" => $viwerlike
             ]);
+            error_log("[" . date('Y-m-d H:i:s') . "] getphoto() with photo succeeded" . "\n", 3, logpath);
         } else {
             echo json_encode(["success" => "No", "message" => "Photo not found"]);
         }
 
         $stmt_photo->close();
 
+
     } catch (Exception $e) {
+        error_log("[" . date('Y-m-d H:i:s') . "] getphoto() failed" . "\n", 3, logpath);
         echo json_encode(["message" => $e->getMessage()]);
     }
 }
@@ -252,7 +287,8 @@ function getphoto()
 //gets multiple posts to create the feed
 function getfeed()
 {
-    error_log("getfeed() called" . "\n", 3, logpath);
+    error_log("[" . date('Y-m-d H:i:s') . "] getfeed() called" . "\n", 3, logpath);
+
     global $liga;
 
     if (!$liga) {
@@ -318,12 +354,179 @@ function getfeed()
         echo json_encode([
             "success" => "Yes",
             "posts" => $posts
+
         ]);
 
+        error_log("[" . date('Y-m-d H:i:s') . "] getfeed() succeeded" . "\n", 3, logpath);
+
     } catch (Exception $e) {
+        error_log("[" . date('Y-m-d H:i:s') . "] getfeed() failled" . "\n", 3, logpath);
         echo json_encode([
             "success" => "No",
             "message" => $e->getMessage()
         ]);
     }
+}
+
+function changelike()
+{
+    global $liga;
+    error_log("[" . date('Y-m-d H:i:s') . "] changelike() called\n", 3, logpath);
+
+    try {
+        $input = json_decode(file_get_contents("php://input"), true);
+        $liked = $input['liked'] ?? null;
+        $postid = $input['postid'] ?? null;
+        $userid = $input['userid'] ?? null;
+
+        if ($liked === true) {
+            $sqllike = "INSERT IGNORE INTO likes (userid, postid) VALUES (?, ?)";
+        } else {
+            $sqllike = "DELETE FROM likes WHERE userid = ? AND postid = ?";
+        }
+
+        $stmt_like = $liga->prepare($sqllike);
+        $stmt_like->bind_param("ii", $userid, $postid);
+        $stmt_like->execute();
+        $stmt_like->close();
+
+        // Count total likes
+        $sqlcountlike = "SELECT COUNT(*) FROM likes WHERE postid = ?";
+        $stmt_countlike = $liga->prepare($sqlcountlike);
+        $stmt_countlike->bind_param("i", $postid);
+        $stmt_countlike->execute();
+        $stmt_countlike->bind_result($countlike);
+        $stmt_countlike->fetch();
+        $stmt_countlike->close();
+
+        die(json_encode([
+            "success" => "Yes",
+            "countlike" => $countlike
+        ]));
+
+    } catch(Exception $e) {
+        error_log("[" . date('Y-m-d H:i:s') . "] changelike() failed: " . $e->getMessage() . "\n", 3, logpath);
+        die (json_encode([
+            "success" => "No",
+            "message" => $e->getMessage()
+        ]));
+    }
+}
+
+function insertComment() {
+    global $liga;
+
+    $input = json_decode(file_get_contents("php://input"), true);
+    $userid = $input['userid'] ?? null;
+    $commentText = $input['commenttext'] ?? '';
+    $postid = $input['response_postid'] ?? null;
+    $commentid = $input['response_commentid'] ?? null;
+
+    if (!$userid || !$commentText || (!$postid && !$commentid)) {
+        echo json_encode(["success" => "No", "message" => "Missing required fields"]);
+        return;
+    }
+
+    try {
+        // Decide which column to use
+        if ($postid) {
+            $sql = "INSERT INTO comment (userid, response_postid, commenttext) VALUES (?, ?, ?)";
+            $stmt = $liga->prepare($sql);
+            $stmt->bind_param("iis", $userid, $postid, $commentText);
+        } else {
+            $sql = "INSERT INTO comment (userid, response_commentid, commenttext) VALUES (?, ?, ?)";
+            $stmt = $liga->prepare($sql);
+            $stmt->bind_param("iis", $userid, $commentid, $commentText);
+        }
+
+        $stmt->execute();
+        $stmt->close();
+
+        echo json_encode(["success" => "Yes"]);
+    } catch (Exception $e) {
+        echo json_encode(["success" => "No", "message" => $e->getMessage()]);
+    }
+}
+
+function getcomments() {
+    global $liga;
+
+    error_log("[" . date('Y-m-d H:i:s') . "] getcomments() called\n", 3, logpath);
+
+    $input = json_decode(file_get_contents("php://input"), true);
+    $postid = $input['postid'] ?? null;
+
+    if (!$postid) {
+        echo json_encode(["success" => "No", "message" => "Missing post ID"]);
+        return;
+    }
+
+    try {
+        // Get all comments related to this post (either directly or as replies)
+        $sql = "    
+            SELECT 
+                c.commentid,
+                c.commenttext,
+                c.date,
+                c.userid,
+                c.response_postid,
+                c.response_commentid,
+                u.username,
+                u.profilepic
+            FROM comment c
+            JOIN users u ON c.userid = u.userid
+            WHERE c.response_postid = ? OR c.response_commentid IS NOT NULL
+            ORDER BY c.date ASC
+        ";
+
+        $stmt = $liga->prepare($sql);
+        $stmt->bind_param("i", $postid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $flatComments = [];
+        while ($row = $result->fetch_assoc()) {
+            $flatComments[] = $row;
+        }
+
+
+        $visited = [];
+        $nestedComments = buildNestedComments($flatComments, $postid, null, 0, $visited);
+
+        echo json_encode(["success" => "Yes", "comments" => $nestedComments]);
+        error_log("[" . date('Y-m-d H:i:s') . "] getcomments() succeeded\n", 3, logpath);
+
+    } catch (Exception $e) {
+        echo json_encode(["success" => "No", "message" => $e->getMessage()]);
+        error_log("[" . date('Y-m-d H:i:s') . "] getcomments() failed: " . $e->getMessage() . "\n", 3, logpath);
+    }
+}
+
+function buildNestedComments($comments, $postid, $parentId = null, $depth = 0, &$visited = []) {
+    $nested = [];
+
+    foreach ($comments as $comment) {
+        $commentId = $comment['commentid'];
+
+        // Prevent circular references
+        if (isset($visited[$commentId])) {
+            continue;
+        }
+
+        // Check if this is a top-level comment or a reply
+        $isTopLevel = $parentId === null && $comment['response_postid'] == $postid && $comment['response_commentid'] === null;
+        $isReply = $parentId !== null && $comment['response_commentid'] == $parentId;
+
+        if ($isTopLevel || $isReply) {
+            $visited[$commentId] = true;
+
+            $replies = buildNestedComments($comments, $postid, $commentId, $depth + 1, $visited);
+
+            $comment['replies'] = $replies ?: [];
+
+            $nested[] = $comment;
+        }
+    }
+
+    return $nested;
 }

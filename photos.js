@@ -117,7 +117,7 @@ function IDSubmit(id) {
 }
 
 //grabs and loads all things of the post
-function loadPhotoDetails(postId, containerSelector = "#post-container") {
+function loadPhotoDetails(postId, viwerid, containerSelector = "#post-container") {
     if (!postId) {
         alert("No post ID provided.");
         return;
@@ -128,7 +128,7 @@ function loadPhotoDetails(postId, containerSelector = "#post-container") {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ postid: postId })
+        body: JSON.stringify({ postid: postId, viwerid: viwerid })
     })
         .then(response => {
             if (!response.ok) console.error('Network response was not ok');
@@ -145,6 +145,9 @@ function loadPhotoDetails(postId, containerSelector = "#post-container") {
                 const photo = container.querySelector("#displayed-photo");
                 const dimensions = container.querySelector("#photo-dimensions");
                 const date = container.querySelector("#post-date");
+                const likenumber = container.querySelector("#likenumber");
+                const likechbox = container.querySelector('#like');
+
 
                 // fill the fields in the divs
                 pfp.src = data.profilepic;
@@ -161,6 +164,11 @@ function loadPhotoDetails(postId, containerSelector = "#post-container") {
                 } else {
                     photoContainer.style.display = "none";
                 }
+
+                likenumber.textContent = data.likenumber;
+
+                likechbox.checked = (data.viwerlike === 1);
+
 
             } else {
                 alert(data.message || "Failed to load post.");
@@ -230,4 +238,155 @@ function loadFeed() {
          console.error("Failed to load feed:", err);
          alert(err);
     });
+}
+
+function like(checkbox, containerSelector = "#post-container")
+{
+   const userid = sessionStorage.getItem('userid');
+   const postid = sessionStorage.getItem('postId');
+   const liked = checkbox.checked;
+
+
+    fetch('photos.php?type=changelike', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ liked: liked, userid: userid, postid: postid})
+    })
+        .then(response => {
+            if (!response.ok) console.error('Network response was not ok');
+            return response.json();})
+        .then(data => {
+            if (data.success === "Yes") {
+                const container = document.querySelector(containerSelector);
+                if (!container) return;
+
+                const like = container.querySelector("#likenumber");
+
+                // fill the like in the div
+                like.textContent = data.countlike;
+
+
+            } else {
+                alert(data.message || "Failed to load likes.");
+            }
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            alert("Error fetching likes.");
+        });
+}
+
+function submitComment(commentData) {
+    fetch('photos.php?type=insertcomment', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(commentData)
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success === "Yes") {
+                alert("Comment submitted!");
+                const targetId = commentData.response_postid || commentData.response_commentid;
+                loadComments(targetId); // Adjust this function as needed
+            } else {
+                alert(data.message || "Failed to insert comment.");
+            }
+        })
+        .catch(err => {
+            console.error("Error submitting comment:", err);
+        });
+}
+
+function formatDate(dateString){
+const date = new Date(dateString);
+return date.toLocaleString(); // Customize format if needed
+}
+
+
+// Recursive renderer for comments and their replies
+function renderComment(commentData, parentContainer) {
+    const template = document.querySelector('#comment-template');
+    const clone = template.content.cloneNode(true);
+    const commentDiv = clone.querySelector('.comment');
+
+    commentDiv.dataset.commentId = commentData.commentid;
+    clone.querySelector('.comment-pfp').src = commentData.profilepic;
+    clone.querySelector('.comment-username').textContent = commentData.username;
+    clone.querySelector('.comment-date').textContent = formatDate(commentData.date);
+    clone.querySelector('.comment-text').textContent = commentData.commenttext;
+
+    const replyBtn = clone.querySelector('.reply-button');
+    replyBtn.addEventListener('click', () => {
+        showReplyForm(commentData.commentid);
+    });
+
+    // Append comment
+    parentContainer.appendChild(clone);
+
+    // Render replies if any
+    if (commentData.replies && commentData.replies.length > 0) {
+        const repliesContainer = commentDiv.querySelector('.comment-replies');
+        commentData.replies.forEach(reply => renderComment(reply, repliesContainer));
+    }
+}
+
+function showReplyForm(parentCommentId) {
+    // Prevent duplicate reply forms
+    const existing = document.querySelector(`.reply-form[data-parentid="${parentCommentId}"]`);
+    if (existing) return;
+
+    const form = document.createElement("div");
+    form.classList.add("comment-form", "reply-form");
+    form.dataset.responsetype = "comment";
+    form.dataset.responseid = parentCommentId;
+
+    form.innerHTML = `
+        <textarea class="comment-input" placeholder="Write a reply..."></textarea>
+        <button class="comment-submit">Reply</button>
+    `;
+
+    const repliesContainer = document.querySelector(`[data-comment-id="${parentCommentId}"] .comment-replies`);
+    repliesContainer.appendChild(form);
+
+    // Attach submit logic
+    const button = form.querySelector(".comment-submit");
+    button.addEventListener("click", () => {
+        const commenttext = form.querySelector(".comment-input").value.trim();
+        const userid = parseInt(sessionStorage.getItem('userid'));
+        const response_commentid = parseInt(form.dataset.responseid);
+
+        if (!commenttext) {
+            alert("Reply cannot be empty.");
+            return;
+        }
+
+        submitComment({ userid, commenttext, response_commentid });
+        form.remove(); // Optionally remove the form after submit
+    });
+}
+
+// Load comments from server
+function loadComments(postId) {
+    fetch('photos.php?type=getcomments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postid: postId })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success === "Yes" && Array.isArray(data.comments)) {
+                const container = document.querySelector('#comments-section');
+                container.innerHTML = ""; // Clear existing comments
+
+                // Render only top-level comments (responsetype === "post")
+                data.comments.forEach(comment => renderComment(comment, container));
+            } else {
+                console.error("Failed to load comments");
+            }
+        })
+        .catch(err => {
+            console.error("Error fetching comments:", err);
+        });
 }

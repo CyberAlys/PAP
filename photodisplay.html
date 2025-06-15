@@ -4,28 +4,58 @@
   <meta charset="UTF-8">
   <title>Display photos</title>
   <script src="photos.js"></script>
+  <script src="user-adm-ver.js"></script>
   <script>
-    function getphoto()
+    document.addEventListener("DOMContentLoaded", () => {
+      const postId = sessionStorage.getItem("postId");
+      // Set data-responseid on all post-level comment forms
+      document.querySelectorAll('.comment-form[data-responsetype="post"]').forEach(form => {
+        form.dataset.responseid = postId;
+      });
+    });
+
+      function getphoto()
     {
       const id = sessionStorage.getItem("postId");
-      sessionStorage.removeItem("postId");
+      const viwerid = sessionStorage.getItem("userid")
 
-      loadPhotoDetails(id);
+      loadPhotoDetails(id, viwerid);
+    }
+    function loadcoms()
+    {
+      const id = sessionStorage.getItem("postId");
+      loadComments(id)
     }
 
   </script>
+  <link href="css/photodisplay.css" rel="stylesheet">
   <style>
     .user-info {
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
+
+    img.photo, #displayed-photo {
+      max-width: 100%;
+      max-height: 600px;
+      height: auto;
+      width: auto;
+      margin: 0 auto;
+      object-fit: contain;
+    }
+
+    .comment-replies {
+      margin-left: 2rem; /* or try 1.5rem or 30px */
+      border-left: 1px solid #ccc;
+      padding-left: 1rem;
+    }
   </style>
 </head>
 
-<body onload="getphoto()">
+<body onload="CheckLogin(); getphoto(); loadcoms()">
 
-<button onclick="window.location.href='allphotos.html'"> <- go back </button>
+<button onclick="window.location.href='allphotos.html'; sessionStorage.removeItem('postId')"> <- go back </button>
 
   <div id="post-container">
     <div class="user-info">
@@ -35,11 +65,83 @@
     </div>
     <p id="post-text"></p>
     <div id="photo-container">
-      <img id="displayed-photo" src="" alt="Loading photo..." />
+      <img class="photo" id="displayed-photo" src="" alt="Loading photo..." />
       <p id="photo-dimensions"></p>
     </div>
     <p id="post-date"> </p>
+
+    <label for="like">👍 Like:</label>
+    <input type="checkbox" id="like">
+    <p id="likenumber">0</p>
+
   </div>
+
+<!-- comment textbox-->
+<div class="comment-form" data-responsetype="post" data-responseid="">
+  <textarea class="comment-input" placeholder="Write a comment..."></textarea>
+  <button class="comment-submit">Reply</button>
+</div>
+
+<!-- comment display template-->
+<template id="comment-template">
+  <div class="comment" data-comment-id="">
+    <div class="comment-header">
+      <img src="" alt="Profile picture" class="comment-pfp" />
+      <span class="comment-username"></span>
+      <span class="comment-date"></span>
+    </div>
+    <div class="comment-body">
+      <p class="comment-text"></p>
+    </div>
+    <div class="comment-actions">
+      <button class="reply-button">Reply</button>
+    </div>
+    <!-- Replies will be inserted here -->
+    <div class="comment-replies"></div>
+  </div>
+</template>
+
+
+<hr>
+
+<!-- Comments section -->
+<div id="comments-section">
+  <!-- Comments will be inserted dynamically here -->
+</div>
+
+
+<script>
+  //changes the like
+  const checkbox = document.getElementById("like");
+  checkbox.addEventListener('change', () => like(checkbox));
+
+  //checks the comment submit
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".comment-form").forEach(form => {
+      const button = form.querySelector(".comment-submit");
+      button.addEventListener("click", () => {
+        const textarea = form.querySelector(".comment-input");
+        const commenttext = textarea.value.trim();
+        const responsetype = form.dataset.responsetype;
+        const responseid = parseInt(form.dataset.responseid);
+        const userid = parseInt(sessionStorage.getItem('userid'));
+
+        if (!commenttext) {
+          alert("Comment cannot be empty.");
+          return;
+        }
+
+        // Pass only the correct field
+        if (responsetype === "post") {
+          submitComment({ userid, commenttext, response_postid: responseid });
+        } else if (responsetype === "comment") {
+          submitComment({ userid, commenttext, response_commentid: responseid });
+        }
+        textarea.value = ""; // clear field after submission
+      });
+    });
+  });
+</script>
 
 </body>
 </html>

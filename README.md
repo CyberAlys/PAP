@@ -5,6 +5,8 @@ Xampp needs to be running to connect to DB <br>
 since you always forget, to reset the auto increment you run "ALTER TABLE tablename AUTO_INCREMENT = 1" okay? <br>
 
 <br>CHANGE OF PLANS, NO MORE INSTA/BLOG: WE MAKING TWITTER NOW <br>
+<br>
+<s>fix image sizing for big images</s> <br>
 
 <hr>
 Emotional support Token Femtanyl

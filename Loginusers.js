@@ -108,6 +108,7 @@ function showPasswordrelog()
                 sessionStorage.setItem('type', data.type);
                 sessionStorage.setItem('username', data.username);
                 sessionStorage.setItem('userid', data.userid);
+                sessionStorage.setItem('profilepic', data.pfp)
 
                 window.location.replace('mainpage.html');
              }
@@ -152,6 +153,7 @@ function showPasswordrelog()
                 sessionStorage.setItem('type', data.type);
                 sessionStorage.setItem('username', data.username);
                 sessionStorage.setItem('userid', data.userid);
+                sessionStorage.setItem('profilepic', data.pfp);
 
                 // Verify if localStorage was set
                 console.log("localStorage set:", {
@@ -208,6 +210,7 @@ function ReLoginPHP()
                 sessionStorage.setItem('type', data.type);
                 sessionStorage.setItem('username', data.username);
                 sessionStorage.setItem('userid', data.userid);
+                sessionStorage.setItem('profilepic', data.pfp);
 
                 // Verify if localStorage was set
                 console.log("localStorage set:", {

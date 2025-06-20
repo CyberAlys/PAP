@@ -2,100 +2,137 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Log in</title>
+    <title>Login | The Photographer</title>
 
-    <script src="Loginusers.js"> </script>
-    <script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 
-    </script>
-        <style>
-            form {
+    <!-- CSS -->
+    <link href="css/login.css" rel="stylesheet">
 
-                display: block;
-                flex-direction: column;
-                gap: 10px;
-                max-width: 400px;
-
-            }
-
-            input, textarea, button, label {
-                padding: 3px;
-                font-size: 10px;
-                margin-bottom: 10px;
-            }
-       </style>
-
-    <link href="css/Modal.css" rel="stylesheet">
+    <!-- Scripts -->
+    <script src="Loginusers.js" defer></script>
 </head>
 <body>
-<!-- LOG IN FORM -->
-    <form id="login" onsubmit="return LoginPHP()" method="post"> <br>
-        <input type="text" id="log-user" name="log-user" placeholder="Username" required> <br>
-        <input type="password" id="log-password" name="log-password" placeholder="Password" required> <br>
-        <input type="button" value="Show Password" id="showpasslog" onclick="showPasswordlogin()"> <br>
-        <input type="submit" value="Log in"> <br>
-    </form>
+
+<body>
+<header class="site-header">
+    <h1 class="site-title">The Photographer</h1>
+</header>
+
+<!-- LOGIN FORM -->
+<form id="login" onsubmit="return LoginPHP()" method="post">
+    <input type="text" id="log-user" name="log-user" placeholder="Username" required>
+    <input type="password" id="log-password" name="log-password" placeholder="Password" required>
+    <input type="button" value="Show Password" id="showpasslog" onclick="showPasswordlogin()">
+    <input type="submit" value="Log in">
+</form>
 
 <!-- REGISTER FORM -->
 <form id="register" onsubmit="return RegisterPHP(new FormData(this))" method="post" style="display: none">
-    <input type="text" placeholder="Username" id="Reg-Username" name="Reg-Username" required> <br>
-    <input type="password" placeholder="Password" id="Reg-Password" name="Reg-Password" minlength="6" maxlength="30" required> <br>
-    <input type="password" placeholder="Confirm password" id="Reg-confPass" name="Reg-confPass" minlength="6" maxlength="30" required> <br>
-    <input type="text" placeholder="Name" id="Reg-Name" name="Reg-Name" required> <br>
-    <input type="email" placeholder="Email" id="Reg-Email" name="Reg-Email" required> <br>
-    <input type="date" placeholder="Birthday" id="Reg-Birth" name="Reg-Birth" required>  <br>
-    <input type="button" value="Show Password" id="showpassreg" onclick="showPasswordreg()"> <br>
-    <label style="font-size: 15px"> By registering you are agreeing with the <a id="terms" href="javascript:open()">terms and conditions</a> </label> <br style="margin-bottom: 10px">
-    <input style="margin-top: 15px" type="submit" value="Register" id="Reg-SubBtt">
+    <input type="text" placeholder="Username" id="Reg-Username" name="Reg-Username" required>
+    <input type="password" placeholder="Password" id="Reg-Password" name="Reg-Password" minlength="6" maxlength="30" required>
+    <input type="password" placeholder="Confirm password" id="Reg-confPass" name="Reg-confPass" minlength="6" maxlength="30" required>
+    <input type="text" placeholder="Name" id="Reg-Name" name="Reg-Name" required>
+    <input type="email" placeholder="Email" id="Reg-Email" name="Reg-Email" required>
+    <input type="date" placeholder="Birthday" id="Reg-Birth" name="Reg-Birth" required>
+    <input type="button" value="Show Password" id="showpassreg" onclick="showPasswordreg()">
+    <label style="font-size: 0.9rem;">
+        By registering you agree with the <a id="terms" href="#" onclick="openmodal(); return false;">terms and conditions</a>
+    </label>
+    <input type="submit" value="Register" id="Reg-SubBtt">
 </form>
-    <h5 style="display: block"  id="switchtoregister">You don't have an account yet? <a id="RegisterText" href="javascript:showregitser()">Register</a> </h5>
-    <h5 style="display: none" id="switchtologin">You already have an account? <a id="LoginText" href="javascript:showlogin()" >Log-In</a> </h5>
 
-<!-- TERMS AND CONDITIONS // KINDA DONE -->
+<!-- TOGGLE LINKS -->
+<h5 id="switchtoregister" style="display: block;">
+    You don't have an account yet? <a href="javascript:showregitser()">Register</a>
+</h5>
+<h5 id="switchtologin" style="display: none;">
+    You already have an account? <a href="javascript:showlogin()">Log-In</a>
+</h5>
 
-    <div class="Modal" id="Modal">
-        <div class="Modal-Header">
-            <div class="Tittle">
-                Terms And Conditions
-            </div>
-            <button id="close" class="Close-Button">&times;</button>
-        </div>
-        <div class="Modal-Body">
-            By accepting the terms and conditions you agree to sell your soul under the nearest bridge; <br>
-            To run around naked in a full moon night at least once every year; <br>
-            And to smash that like and subscribe. <br>
-        </div>
+<!-- TERMS & CONDITIONS MODAL -->
+<div class="Modal" id="Modal">
+    <div class="Modal-Header">
+        <div class="Tittle">Terms and Conditions</div>
+        <button id="close" class="Close-Button">&times;</button>
     </div>
-    <div id="Overlay"></div>
+    <div class="Modal-Body">
+        <strong>Effective Date:</strong> Whenever the moon is full.<br>
+        <strong>Last Updated:</strong> A moment ago.<br><br>
 
-    <script>
-        //grab the buttons
-        var modal = document.getElementById("Modal");
-        var overlay = document.getElementById("Overlay");
-        var btnclose = document.getElementById("close");
+        Welcome to <em>The Photographer</em>. By accessing or using this website, you agree to be bound by these Terms and Conditions. Please read them carefully. Seriously. We worked hard on them.<br><br>
 
-        //open modal
-        function open()
-        {
-            modal.style.display = "Block";
-            overlay.style.opacity = "1";
-        }
+        <strong>1. Acceptance of Terms</strong><br>
+        You affirm that:<br>
+        • You are at least 13 years old (or a very advanced potato).<br>
+        • You agree to these terms, our privacy policy, and that cookies are delicious, but only metaphorically here.<br><br>
 
-        //close modal
-        btnclose.onclick = function()
-        {
+        <strong>2. User Responsibilities</strong><br>
+        • Be excellent to each other.<br>
+        • Don’t upload blurry photos unless ironically retro.<br>
+        • Refrain from summoning demons in the comments. We tried once. Didn’t go well.<br><br>
+
+        <strong>3. Intellectual Property</strong><br>
+        • You own your content.<br>
+        • We may lovingly showcase your duck photos in memes or digital shrines.<br><br>
+
+        <strong>4. Account Security</strong><br>
+        If your dog logs in and likes squirrel photos, that’s on you.<br><br>
+
+        <strong>5. Prohibited Activities</strong><br>
+        • Time travel.<br>
+        • Training pigeons to take over the city.<br>
+        • Elon Musk riding dolphins. It’s been done.<br><br>
+
+        <strong>6. Termination</strong><br>
+        We may delete your account if you:<br>
+        • Behave badly,<br>
+        • Lose a Photoshop duel to the mods,<br>
+        • Post vertical videos. You monster.<br><br>
+
+        <strong>7. Limitation of Liability</strong><br>
+        Not responsible for:<br>
+        • Emotional damage from artsy portraits,<br>
+        • Sudden fame,<br>
+        • Aliens discovering your work.<br><br>
+
+        <strong>8. Governing Law</strong><br>
+        Settled in the nearest café with decent Wi-Fi. Thumb wars optional.<br><br>
+
+        <strong>9. Final Clause</strong><br>
+        By continuing, you acknowledge you’ve read these terms, giggled at least once, and solemnly swear never to use Comic Sans in a caption.
+    </div>
+</div>
+<div id="Overlay"></div>
+
+<!-- MODAL JS -->
+<script>
+    const modal = document.getElementById("Modal");
+    const overlay = document.getElementById("Overlay");
+    const closeBtn = document.getElementById("close");
+
+    function openmodal() {
+        modal.style.display = "flex";
+        overlay.style.opacity = "1";
+        overlay.style.pointerEvents = "auto";
+        document.body.classList.add("modal-open");
+    }
+    closeBtn.onclick = function () {
+        modal.style.display = "none";
+        overlay.style.opacity = "0";
+        overlay.style.pointerEvents = "none";
+    }
+
+    window.onclick = function (event) {
+        if (event.target === modal) {
             modal.style.display = "none";
             overlay.style.opacity = "0";
+            overlay.style.pointerEvents = "none";
         }
+    }
+</script>
 
-        //it don't work
-        window.onclick = function (event) {
-            if(event.target === modal) {
-                modal.style.display = "none";
-                overlay.style.opacity = "0";
-            }
-        }
-
-    </script>
 </body>
+
 </html>

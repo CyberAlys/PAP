@@ -3,34 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <title id="Tittle">Welcome Back</title>
+    <link rel="stylesheet" href="css/relogin.css">
     <script src="Loginusers.js"></script>
     <script>
-        function AdditionalVerification()
-        {
-            var authtoken = localStorage.getItem('authToken');
-            var usertoken = sessionStorage.getItem('username');
-            if ((!authtoken && !usertoken) || (!authtoken && usertoken) || (authtoken && !usertoken))
-            {
+        function AdditionalVerification() {
+            const authtoken = localStorage.getItem('authToken');
+            const usertoken = sessionStorage.getItem('username');
+            if ((!authtoken && !usertoken) || (!authtoken && usertoken) || (authtoken && !usertoken)) {
                 localStorage.clear();
                 sessionStorage.clear();
                 window.location.href = 'loginuser.html';
+            } else {
+                document.getElementById("text").innerHTML = "Welcome back, <strong>" + usertoken + "</strong>";
             }
-            else
-            {
-                document.getElementById("text").innerHTML = "Welcome back " + usertoken;
-            }
-
         }
-
     </script>
 </head>
+
 <body onload="AdditionalVerification();">
-    <h1 id="text" style="text-align: center"></h1>
+<div class="relogin-container">
+    <h1 id="text">Welcome back</h1>
+
     <form onsubmit="return ReLoginPHP()" method="post">
         <input type="password" placeholder="Password" id="Relog-Pass" name="Relog-Pass" minlength="6" maxlength="30" required>
-        <input type="submit" value="Log-In"> <br>
-        <input type="button" value="Show Password" id="showpassrelog" onclick="showPasswordrelog()"> <br>
+        <input type="submit" value="Log In">
+        <input type="button" value="Show Password" id="showpassrelog" onclick="showPasswordrelog()">
     </form>
-    <button onclick="window.location.href ='loginuser.html' ">Log out</button>
+
+    <button class="logout-btn" onclick="window.location.href ='loginuser.html'">Log out</button>
+</div>
 </body>
 </html>

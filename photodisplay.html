@@ -62,17 +62,35 @@
       <label>Posted by</label>
       <img id="OP-pfp" src="" alt="Loading Photo..." style="width: 40px; height: 40px; border-radius: 50%"/>
       <H3 id="OP-name"></H3>
+      <div id="post-options" class="post-options-menu" style="display: none;">
+        <button class="menu-toggle">⋮</button>
+        <div class="menu-dropdown" style="display: none;">
+          <button class="edit-post">Edit</button>
+          <button class="delete-post">Delete</button>
+        </div>
+      </div>
     </div>
     <p id="post-text"></p>
     <div id="photo-container">
       <img class="photo" id="displayed-photo" src="" alt="Loading photo..." />
       <p id="photo-dimensions"></p>
     </div>
+
+    <div id="edit-post-area" style="display: none; margin-top: 1rem;">
+      <textarea id="edit-post-text" rows="4" style="width: 100%;"></textarea>
+      <button onclick="saveEditedPost()">Save Changes</button>
+      <button onclick="cancelEdit()">Cancel</button>
+    </div>
+
     <p id="post-date"> </p>
 
-    <label for="like">👍 Like:</label>
-    <input type="checkbox" id="like">
-    <p id="likenumber">0</p>
+    <div class="like-container">
+      <button id="like-button" class="like-button" aria-label="Like post">
+        <span class="heart-icon">🤍</span>
+      </button>
+      <span id="likenumber">0</span>
+    </div>
+
 
   </div>
 
@@ -112,8 +130,18 @@
 
 <script>
   //changes the like
-  const checkbox = document.getElementById("like");
-  checkbox.addEventListener('change', () => like(checkbox));
+  document.addEventListener("DOMContentLoaded", () => {
+    const likeBtn = document.getElementById("like-button");
+    const heart = likeBtn.querySelector(".heart-icon");
+
+    likeBtn.addEventListener("click", () => {
+      const isLiked = likeBtn.classList.toggle("liked");
+      heart.textContent = isLiked ? "💙" : "🤍";
+      heart.style.transform = "scale(1.3)";
+      setTimeout(() => heart.style.transform = "scale(1)", 150);
+      like(isLiked); // Call your updated like function
+    });
+  });
 
   //checks the comment submit
   document.addEventListener("DOMContentLoaded", () => {
@@ -141,6 +169,39 @@
       });
     });
   });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggleButton = document.querySelector(".menu-toggle");
+    const dropdown = document.querySelector(".menu-dropdown");
+
+    toggleButton?.addEventListener("click", () => {
+      dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    });
+
+    document.querySelector(".delete-post").addEventListener("click", () => {
+      if (confirm("Are you sure you want to delete this post?")) {
+        deletePost();
+      }
+      dropdown.style.display = "none";
+    });
+
+    // Close menu if clicking outside
+    document.addEventListener("click", (e) => {
+      if (!document.getElementById("post-options").contains(e.target)) {
+        dropdown.style.display = "none";
+      }
+    });
+  });
+
+  document.querySelector(".edit-post").addEventListener("click", () => {
+    const currentText = document.getElementById("post-text").textContent;
+    const editBox = document.getElementById("edit-post-area");
+    const editInput = document.getElementById("edit-post-text");
+
+    editInput.value = currentText;
+    editBox.style.display = "block";
+  });
+
 </script>
 
 </body>

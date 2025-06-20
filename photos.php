@@ -8,47 +8,42 @@ header('Content-Type: application/json');
 
 DEFINE("logpath" ,   __DIR__ . "/logs/testlogs.log");
 
-//checks to see the type of operation (login or register or other operations)
-if($_SERVER['REQUEST_METHOD'] === 'POST')
-{
-    try
-    {
+//checks to see the type of operation
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        $type = $_GET['type'] ?? '';
 
-        $type = $_GET['type'];
+        error_log("[" . date('Y-m-d H:i:s') . "] type selector called with: " . $type . "\n", 3, logpath);
 
-        error_log("[" . date('Y-m-d H:i:s') . "] type selector called with: " ."$type". "\n", 3, logpath);
-
-        if($type == 'saveinserver')
-        {
-            saveinserver();
+        switch ($type) {
+            case 'saveinserver':
+                saveinserver();
+                break;
+            case 'getphoto':
+                getphoto();
+                break;
+            case 'getfeed':
+                getfeed();
+                break;
+            case 'changelike':
+                changelike();
+                break;
+            case 'insertcomment':
+                insertcomment();
+                break;
+            case 'getcomments':
+                getcomments();
+                break;
+            case 'deletepost':
+                deletepost();
+                break;
+            case 'editpost':
+                editpost();
+                break;
+            default:
+                echo json_encode(["message" => "Invalid Action type"]);
         }
-        elseif ($type == 'getphoto')
-        {
-            getphoto();
-        }
-        elseif ($type == 'getfeed')
-        {
-            getfeed();
-        }
-        elseif ($type == 'changelike')
-        {
-            changelike();
-        }
-        elseif($type == 'insertcomment')
-        {
-            insertcomment();
-        }
-        elseif($type == 'getcomments')
-        {
-            getcomments();
-        }
-        else
-        {
-            echo json_encode(["message" => "Invalid Action type"]);
-        }
-    }
-    catch (Exception $e)
-    {
+    } catch (Exception $e) {
         echo json_encode(["message" => $e->getMessage()]);
     }
 }
@@ -180,7 +175,7 @@ function getphoto()
 
         $input = json_decode(file_get_contents("php://input"), true);
         $id = $input['postid'] ?? null;
-        $viwer = $input['viwerid'] ?? null;
+        $viwer = $input['viewerid'] ?? null;
 
         if (!$id || !is_numeric($id)) {
             echo json_encode(["success" => "No", "message" => "Invalid photo ID"]);
@@ -240,6 +235,7 @@ function getphoto()
                 "text" => $text,
                 "date" => $date,
                 "username" => $username,
+                "userid" => $userid,
                 "profilepic" => $profilepic,
                 "likenumber" => $Likenumber,
                 "viwerlike" => $viwerlike
@@ -265,6 +261,7 @@ function getphoto()
                 "width" => $width,
                 "height" => $height,
                 "username" => $username,
+                "userid" => $userid,
                 "profilepic" => $profilepic,
                 "likenumber" => $Likenumber,
                 "viwerlike" => $viwerlike
@@ -529,4 +526,68 @@ function buildNestedComments($comments, $postid, $parentId = null, $depth = 0, &
     }
 
     return $nested;
+}
+
+function deletepost()
+{
+    global $liga;
+
+    try {
+        $input = json_decode(file_get_contents("php://input"), true);
+        $postid = $input['postid'] ?? null;
+
+        if (!$postid) {
+            throw new Exception("Post ID is required.");
+        }
+
+        // Step 1: Delete all comments on the post and replies to those comments
+        $deleteComments = "
+            DELETE FROM comment 
+            WHERE response_postid = ? OR response_commentid IN (
+                SELECT commentid FROM comment WHERE response_postid = ?
+            )
+        ";
+        $stmt = $liga->prepare($deleteComments);
+        $stmt->bind_param("ii", $postid, $postid);
+        $stmt->execute();
+
+        // Step 2: Delete the post itself
+        $deletePost = "DELETE FROM post WHERE postid = ?";
+        $stmt = $liga->prepare($deletePost);
+        $stmt->bind_param("i", $postid);
+        $stmt->execute();
+
+        echo json_encode([
+            "success" => "Yes",
+            "message" => "Post and associated comments deleted."
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            "success" => "No",
+            "message" => $e->getMessage()
+        ]);
+    }
+}
+
+function editpost() {
+    global $liga;
+    $input = json_decode(file_get_contents("php://input"), true);
+
+    $postid = $input['postid'] ?? null;
+    $text = $input['text'] ?? null;
+
+    if (!$postid || !$text) {
+        echo json_encode(["success" => "No", "message" => "Missing fields"]);
+        return;
+    }
+
+    try {
+        $stmt = $liga->prepare("UPDATE post SET text = ? WHERE postid = ?");
+        $stmt->bind_param("si", $text, $postid);
+        $stmt->execute();
+
+        echo json_encode(["success" => "Yes"]);
+    } catch (Exception $e) {
+        echo json_encode(["success" => "No", "message" => $e->getMessage()]);
+    }
 }

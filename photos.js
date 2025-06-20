@@ -1,9 +1,3 @@
-
-function changetouploadpage()
-{
-    sessionStorage.setItem('phototype', 'upload');
-    window.location.href = 'photos.html';
-}
 function toggleImageUpload() {
     const imageSection = document.getElementById("image-section");
     imageSection.style.display = imageSection.style.display === "none" ? "block" : "none";
@@ -99,7 +93,7 @@ function sendToServer(data) {
         })
         .then(data => {
             if (data.success === "Yes") {
-                window.location.href = 'mainpage.html';
+                window.top.location.href = 'mainpage.html';
             } else {
                 alert(data.message || "Upload failed.");
             }
@@ -117,9 +111,9 @@ function IDSubmit(id) {
 }
 
 //grabs and loads all things of the post
-function loadPhotoDetails(postId, viwerid, containerSelector = "#post-container") {
+function loadPhotoDetails(postId, viewerid, containerSelector = "#post-container") {
     if (!postId) {
-        alert("No post ID provided.");
+        window.location.href = "allphotos.html";
         return;
     }
 
@@ -128,7 +122,7 @@ function loadPhotoDetails(postId, viwerid, containerSelector = "#post-container"
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ postid: postId, viwerid: viwerid })
+        body: JSON.stringify({ postid: postId, viewerid: viewerid })
     })
         .then(response => {
             if (!response.ok) console.error('Network response was not ok');
@@ -155,6 +149,13 @@ function loadPhotoDetails(postId, viwerid, containerSelector = "#post-container"
                 text.textContent = data.text;
                 date.textContent = `Posted on ${data.date}`;
 
+                const type = sessionStorage.getItem('type');
+                console.log("viewerid", viewerid, "post owner", data.userid);
+
+                if ((parseInt(viewerid) === parseInt(data.userid)) || type === "adm") {
+                    document.getElementById("post-options").style.display = "block";
+                }
+
                 //if to see if there's a photo
                 if (data.photo === true) {
                     photo.src = data.path;
@@ -165,9 +166,22 @@ function loadPhotoDetails(postId, viwerid, containerSelector = "#post-container"
                     photoContainer.style.display = "none";
                 }
 
-                likenumber.textContent = data.likenumber;
+                const likeButton = container.querySelector('#like-button');
+                const heart = likeButton?.querySelector(".heart-icon");
 
-                likechbox.checked = (data.viwerlike === 1);
+                if (likeButton) {
+                    if (data.viwerlike === 1) {
+                        likeButton.classList.add('liked');
+                        if (heart) heart.textContent = "💙";
+                    } else {
+                        likeButton.classList.remove('liked');
+                        if (heart) heart.textContent = "🤍";
+                    }
+                }
+
+                const likeDisplay = document.getElementById("likenumber");
+                if (likeDisplay) likeDisplay.textContent = data.likenumber;
+
 
 
             } else {
@@ -240,43 +254,41 @@ function loadFeed() {
     });
 }
 
-function like(checkbox, containerSelector = "#post-container")
-{
-   const userid = sessionStorage.getItem('userid');
-   const postid = sessionStorage.getItem('postId');
-   const liked = checkbox.checked;
-
+function like(isLiked) {
+    const postId = sessionStorage.getItem("postId");
+    const userId = sessionStorage.getItem("userid");
 
     fetch('photos.php?type=changelike', {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ liked: liked, userid: userid, postid: postid})
+        method: 'POST',
+        body: JSON.stringify({ postid: postId, userid: userId, liked: isLiked }),
+        headers: { 'Content-Type': 'application/json' }
     })
         .then(response => {
-            if (!response.ok) console.error('Network response was not ok');
-            return response.json();})
+            if (!response.ok) throw new Error("Network error");
+            return response.json();
+        })
         .then(data => {
             if (data.success === "Yes") {
-                const container = document.querySelector(containerSelector);
-                if (!container) return;
-
-                const like = container.querySelector("#likenumber");
-
-                // fill the like in the div
-                like.textContent = data.countlike;
-
-
+                const likeDisplay = document.getElementById("likenumber");
+                if (likeDisplay) likeDisplay.textContent = data.countlike;
             } else {
-                alert(data.message || "Failed to load likes.");
+                console.error("Server error:", data.message || "Unknown error");
             }
         })
         .catch(err => {
-            console.error("Error:", err);
-            alert("Error fetching likes.");
+            console.error("Error sending like:", err);
         });
 }
+
+function updateLikeCount() {
+    // Call endpoint or reload the number
+    fetch(`/getlikes.php?postId=${sessionStorage.getItem("postId")}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("likenumber").textContent = data.likes || 0;
+        });
+}
+
 
 function submitComment(commentData) {
     fetch('photos.php?type=insertcomment', {
@@ -388,5 +400,60 @@ function loadComments(postId) {
         })
         .catch(err => {
             console.error("Error fetching comments:", err);
+        });
+}
+
+function deletePost() {
+    const postid = sessionStorage.getItem("postId");
+
+    fetch("photos.php?type=deletepost", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postid: postid}),
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data.success === "Yes") {
+                alert("Post deleted!");
+                window.location.href = "allphotos.html";
+            } else {
+                alert("Failed to delete post: " + data.message);
+            }
+        })
+        .catch((err) => {
+            console.error("Delete failed:", err);
+        });
+}
+
+function cancelEdit() {
+    document.getElementById("edit-post-area").style.display = "none";
+}
+
+function saveEditedPost() {
+    const newText = document.getElementById("edit-post-text").value.trim();
+    const postid = sessionStorage.getItem("postId");
+
+    if (!newText) {
+        alert("Post text cannot be empty.");
+        return;
+    }
+
+    fetch("photos.php?type=editpost", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postid, text: newText })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success === "Yes") {
+                document.getElementById("post-text").textContent = newText;
+                cancelEdit();
+            } else {
+                alert("Failed to edit post: " + data.message);
+            }
+        })
+        .catch(err => {
+            console.error("Edit error:", err);
+            alert("Error editing post.");
         });
 }

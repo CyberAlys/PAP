@@ -2,25 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Photos</title>
-    <script src="photos.js" ></script>
-    <script src="user-adm-ver.js"></script>
+
+    <title>Upload | The Photographer</title>
+
+    <!-- style-->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link href="css/upload.css" rel="stylesheet">
+
+    <!-- Scripts -->
+    <script src="photos.js" defer></script>
+    <script src="user-adm-ver.js" defer></script>
 </head>
 <body onload="CheckLogin()">
 
-<form id="photoupload" onsubmit="uploadpicturetophp(event)">
-    <label for="text">Write something:</label>
-    <input type="text" id="text"><br>
+<div class="upload-wrapper">
+    <h1>New Post</h1>
 
-    <button type="button" onclick="toggleImageUpload()">📸 Add/Remove Image</button><br>
+    <form id="photoupload" onsubmit="uploadpicturetophp(event)">
+        <label for="text">Write something:</label>
+        <input type="text" id="text"><br>
 
-    <div id="image-section" style="display: none;">
-        <label for="img">Select image:</label>
-        <input type="file" id="img" name="img" accept="image/*"><br>
-    </div>
+        <button type="button" onclick="toggleImageUpload()">📸 Add/Remove Image</button><br>
 
-    <input type="submit" value="Post">
-</form>
+        <div id="image-section" style="display: none;">
+            <label for="img">Select image:</label>
+            <input type="file" id="img" name="img" accept="image/*"><br>
+        </div>
 
+        <input type="submit" value="Post">
+        <button type="button" onclick="cancelUpload()">Cancel</button> <!-- 👈 New cancel button -->
+    </form>
+
+</div>
+
+<script>
+    function cancelUpload() {
+        // If in an iframe, go back to the main feed
+        if (window.top !== window.self) {
+            window.parent.postMessage({ action: 'backToMain' }, '*');
+        } else {
+            window.location.href = 'mainpage.html';
+        }
+    }
+</script>
 </body>
 </html>

@@ -3,37 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <title>The Photographer</title>
-    <script src="user-adm-ver.js"> </script>
-    <script src="photos.js" defer> </script>
+    <link rel="stylesheet" href="css/mainpage.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <script src="user-adm-ver.js"></script>
+    <script src="photos.js" defer></script>
 
 </head>
 
-<body onload="CheckLogin()">
-
-
-<center>
-    <H1 id="test usertype"></H1>
-</center>
-
-
-    <button onClick="changetouploadpage()">Upload picture</button> <br>
-
-    <hr style="height: 5px; background-color: black; border: none;">
-
-    <div style="display: flex; flex-direction: column; height: 100vh;">
-        <iframe src="allphotos.html" style="flex-grow: 1; border: none;"></iframe>
+<body onload="CheckLogin(); loadHeaderInfo();">
+<div class="header">
+    <button class="menu-button" onclick="toggleSidebar()">☰</button>
+    <div class="logo">The Photographer</div>
+    <div class="user-info">
+        <span id="username">Loading...</span>
+        <img id="userpfp" src="" alt="pfp" />
     </div>
+</div>
 
-    <script>
-        if (CheckIfUser())
-        {
-            document.getElementById("test usertype").innerHTML = "The Photographer";
-        }
-        else if (!CheckIfUser())
-        {
-            document.getElementById("test usertype").innerHTML = "The Photographer (adm)";
+<div class="sidebar" id="sidebar">
+    <button onclick="loadIframe('allphotos.html')">Feed</button>
+    <button onclick="loadIframe('photos.html')">Make a Post</button>
+    <button onclick="alert('Profile soon')">Profile</button>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<div class="iframe-container">
+    <iframe src="allphotos.html"></iframe>
+</div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        const overlay = document.getElementById("overlay");
+        sidebar.classList.toggle("active");
+        overlay.classList.toggle("active");
+    }
+
+    function loadHeaderInfo() {
+        const username = sessionStorage.getItem("username") || "User";
+        const profilepic = sessionStorage.getItem("profilepic") || "defaultpfp.png";
+
+        document.getElementById("username").textContent = username;
+        document.getElementById("userpfp").src = profilepic;
+
+        const typeLabel = CheckIfUser() ? "The Photographer" : "The Photographer (adm)";
+        document.title = typeLabel;
+    }
+
+    function logout()
+    {
+        sessionStorage.clear();
+        localStorage.clear();
+        window.location.href ="loginuser.html";
+    }
+
+    function loadIframe(page) {
+        const iframe = document.querySelector(".iframe-container iframe");
+        if (iframe) {
+            iframe.src = page;
         }
 
-    </script>
+        // Close sidebar and overlay
+        document.getElementById("sidebar").classList.remove("active");
+        document.getElementById("overlay").classList.remove("active");
+    }
+
+    window.addEventListener("message", (event) => {
+        if (event.data.action === "backToMain") {
+            document.querySelector("iframe").src = "allphotos.html";
+        }
+    });
+
+</script>
 </body>
 </html>

@@ -186,7 +186,8 @@
                     "token" => $token,
                     "type" => $user_type,
                     "username" => $username,
-                    "userid" => $userid
+                    "userid" => $userid,
+                    "pfp" => $profilepic
                 ]);
             }
             else
@@ -242,7 +243,8 @@
                         "token" => $token,
                         "type" => $user_type,
                         "username" => $user['username'],
-                        "userid" => $user['userid']
+                        "userid" => $user['userid'],
+                        "pfp" => $user['profilepic']
 
                     ]);
                 }
@@ -338,7 +340,8 @@
                         "token" => $token,
                         "type" => $user_type,
                         "username" => $user['username'],
-                        "userid" => $user['userid']
+                        "userid" => $user['userid'],
+                        "pfp" => $user['profilepic']
 
                     ]);
                 }

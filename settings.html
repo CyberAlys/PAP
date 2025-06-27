@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>User Settings</title>
+    <link rel="stylesheet" href="css/settings.css" />
+    <script src="profiles.js"></script>
+    <script src="user-adm-ver.js"></script>
+</head>
+<body onload="CheckLogin();">
+
+<button class="backbutton" onclick="returnToProfile()">← Go back</button>
+
+<h1>Settings</h1>
+
+<!-- Profile Picture Update -->
+<section>
+    <h2>Change Profile Picture</h2>
+    <div class="current-pfp">
+        <img id="current-profile-pic" src="" alt="Current Profile Picture" />
+    </div>
+    <form id="pfp-form" enctype="multipart/form-data" onsubmit="return handleProfilePicUpload(event)">
+        <input type="file" id="profilepic" name="profilepic" accept="image/jpeg, image/png, image/webp"
+               onchange="handleFileSelect(event)" required />
+        <div class="file-info">
+            <span id="file-name">No file selected</span>
+            <span id="file-size"></span>
+        </div>
+        <button type="submit" id="upload-btn">Upload</button>
+        <div class="upload-progress" id="upload-progress" style="display: none;">
+            <div class="progress-bar"></div>
+            <span class="progress-text">Uploading...</span>
+        </div>
+    </form>
+    <div id="pfp-message" class="message" role="alert"></div>
+</section>
+
+<!-- Username Update -->
+<section>
+    <h2>Change Username</h2>
+    <form id="username-form" onsubmit="return handleUsernameChange(event)">
+        <input type="text" name="newusername" placeholder="New Username" required />
+        <button type="submit">Update</button>
+    </form>
+    <div id="username-message" class="message" role="alert"></div>
+</section>
+
+<!-- Password Update -->
+<section>
+    <h2>Change Password</h2>
+    <form id="password-form" onsubmit="return handlePasswordChange(event)">
+        <input type="password" name="oldpassword" placeholder="Current Password" required />
+        <input type="password" name="newpassword" placeholder="New Password" required />
+        <input type="password" name="confirmpassword" placeholder="Confirm New Password" required />
+        <button type="submit">Change Password</button>
+    </form>
+    <div id="password-message" class="message" role="alert"></div>
+</section>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const userid = sessionStorage.getItem("userid");
+        if (!userid) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        loadCurrentProfilePic(userid);
+    });
+
+    // Updated showMessage function for specific forms
+    function showMessage(data, elementId) {
+        const box = document.getElementById(elementId);
+        if (!box) return;
+
+        // Clear and reset
+        box.textContent = data.message || "";
+        box.className = "message"; // Reset to base class
+        box.setAttribute('aria-live', 'polite');
+
+        // Apply specific styling
+        if (data.success === "Yes") {
+            box.classList.add("success");
+            box.setAttribute('aria-label', 'Success message');
+        } else {
+            box.classList.add("error");
+            box.setAttribute('aria-label', 'Error message');
+        }
+
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            box.textContent = "";
+            box.className = "message";
+            box.removeAttribute('aria-live');
+        }, 5000);
+    }
+
+
+    // Updated handlers to use specific message boxes
+    async function handleProfilePicUpload(event) {
+        event.preventDefault();
+        const userid = sessionStorage.getItem("userid");
+        if (!userid) {
+            showMessage({ success: "No", message: "Please log in first" }, "pfp-message");
+            return false;
+        }
+
+        await ProfilePicChange(userid);
+        return false;
+    }
+
+    async function handleUsernameChange(event) {
+        event.preventDefault();
+        const userid = sessionStorage.getItem("userid");
+        if (!userid) {
+            showMessage({ success: "No", message: "Please log in first" }, "username-message");
+
+            return false;
+        }
+
+        await UsernameChange(userid);
+        return false;
+    }
+
+    async function handlePasswordChange(event) {
+        event.preventDefault();
+        const userid = sessionStorage.getItem("userid");
+        if (!userid) {
+            showMessage({ success: "No", message: "Please log in first" }, "password-message");
+            return false;
+        }
+
+        await PasswordChange(userid);
+        return false;
+    }
+
+    function returnToProfile() {
+        const userid = sessionStorage.getItem("userid");
+        if (!userid) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        // Force refresh the profile
+        sessionStorage.setItem("forceRefreshProfile", "true");
+
+        // Navigate back to main page
+        const iframeUrl = `userarea.html?userid=${userid}&t=${Date.now()}`;
+        window.location.href = `mainpage.html?loadiframe=${encodeURIComponent(iframeUrl)}`;
+    }
+
+
+</script>
+</body>
+</html>

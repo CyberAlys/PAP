@@ -23,7 +23,7 @@
 <div class="sidebar" id="sidebar">
     <button onclick="loadIframe('allphotos.html')">Feed</button>
     <button onclick="loadIframe('photos.html')">Make a Post</button>
-    <button onclick="alert('Profile soon')">Profile</button>
+    <button onclick="openMyProfile()">Profile</button>
     <button onclick="logout()">Logout</button>
 </div>
 
@@ -41,15 +41,38 @@
         overlay.classList.toggle("active");
     }
 
-    function loadHeaderInfo() {
-        const username = sessionStorage.getItem("username") || "User";
-        const profilepic = sessionStorage.getItem("profilepic") || "defaultpfp.png";
+    function loadHeaderInfo(forceRefresh = false) {
+        try {
+            // If forcing refresh, clear cached values and add timestamp
+            if (forceRefresh) {
+                const profilepic = sessionStorage.getItem("profilepic");
+                if (profilepic) {
+                    // Remove any existing cache busting parameter
+                    const cleanUrl = profilepic.split('?')[0];
+                    sessionStorage.setItem("profilepic", cleanUrl + "?t=" + Date.now());
+                }
+            }
 
-        document.getElementById("username").textContent = username;
-        document.getElementById("userpfp").src = profilepic;
+            const username = sessionStorage.getItem("username") || "User";
+            const profilepic = sessionStorage.getItem("profilepic") || "defaultpfp.png";
 
-        const typeLabel = CheckIfUser() ? "The Photographer" : "The Photographer (adm)";
-        document.title = typeLabel;
+            // Update DOM elements
+            document.getElementById("username").textContent = username;
+
+            const pfpElement = document.getElementById("userpfp");
+            if (forceRefresh) {
+                // Force refresh by adding timestamp if not already present
+                pfpElement.src = profilepic.includes('?') ? profilepic : profilepic + "?t=" + Date.now();
+            } else {
+                pfpElement.src = profilepic;
+            }
+
+            // Update page title
+            const typeLabel = CheckIfUser() ? "The Photographer" : "The Photographer (adm)";
+            document.title = typeLabel;
+        } catch (error) {
+            console.error("Error loading header info:", error);
+        }
     }
 
     function logout()
@@ -74,6 +97,50 @@
         if (event.data.action === "backToMain") {
             document.querySelector("iframe").src = "allphotos.html";
         }
+    });
+
+    function openMyProfile() {
+        const userid = sessionStorage.getItem("userid");
+        if (!userid) {
+            alert("You must be logged in to view your profile.");
+            return;
+        }
+        const iframe = document.querySelector(".iframe-container iframe");
+        if (iframe) {
+            iframe.src = `userarea.html?userid=${userid}`;
+        }
+
+        document.getElementById("sidebar").classList.remove("active");
+        document.getElementById("overlay").classList.remove("active");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const forceRefresh = sessionStorage.getItem("forceRefreshProfile") === "true";
+        if (forceRefresh) {
+            sessionStorage.removeItem("forceRefreshProfile");
+            loadHeaderInfo(true);
+        } else {
+            loadHeaderInfo();
+        }
+        // Load header info initially
+        loadHeaderInfo();
+
+        // Check for iframe load parameter
+        const params = new URLSearchParams(window.location.search);
+        const iframeUrl = params.get('loadiframe');
+        if (iframeUrl) {
+            const iframeUrl = decodeURIComponent(params.get('loadiframe'));
+            if (iframe) {
+                iframe.src = iframeUrl;
+            }
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+            // pass true to force refresh on header info
+            loadHeaderInfo(true);
+        }
+
     });
 
 </script>

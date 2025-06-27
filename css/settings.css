@@ -1,0 +1,153 @@
+body {
+    font-family: 'Georgia', serif;
+    background-color: #111;
+    color: #eee;
+    margin: 0;
+    padding: 40px;
+    max-width: 600px;
+    margin: auto;
+}
+
+h1, h2 {
+    font-weight: normal;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+section {
+    margin-bottom: 40px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="file"] {
+    padding: 10px;
+    border: 1px solid #444;
+    background-color: #1a1a1a;
+    color: #eee;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+button {
+    background-color: #222;
+    color: white;
+    border: 1px solid #555;
+    padding: 0.5rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background 0.2s ease;
+}
+
+button:hover {
+    background-color: #444;
+}
+
+/* Base message style */
+.message {
+    margin-top: 20px;
+    font-size: 14px;
+    padding: 12px 15px;
+    border-radius: 6px;
+    border-left: 4px solid transparent;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Profile Picture Messages */
+#pfp-message.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-left-color: #43a047;
+}
+
+#pfp-message.error {
+    background-color: #ffebee;
+    color: #c62828;
+    border-left-color: #e53935;
+}
+
+/* Username Messages */
+#username-message.success {
+    background-color: #0d47a1;
+    color: #e3f2fd;
+    border-left-color: #42a5f5;
+    box-shadow: 0 2px 8px rgba(13, 71, 161, 0.3);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+
+#username-message.error {
+    background-color: #fff3e0;
+    color: #e65100;
+    border-left-color: #fb8c00;
+}
+
+/* Password Messages */
+#password-message.success {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+    border-left-color: #2e7d32;
+}
+
+#password-message.error {
+    background-color: #fce4ec;
+    color: #ad1457;
+    border-left-color: #d81b60;
+}
+
+/* Animation for messages */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Progress bar styling */
+.upload-progress {
+    margin-top: 10px;
+    background: #f1f1f1;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 6px;
+    background: linear-gradient(90deg, #4caf50, #8bc34a);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.backbutton {
+    background-color: #222;
+    color: white;
+    border: 1px solid #555;
+    padding: 0.5rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background 0.2s ease;
+}
+
+.backbutton:hover {
+    background-color: #444;
+}
+
+.current-pfp img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #555;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}

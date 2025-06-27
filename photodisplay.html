@@ -55,13 +55,13 @@
 
 <body onload="CheckLogin(); getphoto(); loadcoms()">
 
-<button onclick="window.location.href='allphotos.html'; sessionStorage.removeItem('postId')"> <- go back </button>
+<button onclick="goBack()">← go back</button>
 
   <div id="post-container">
     <div class="user-info">
       <label>Posted by</label>
       <img id="OP-pfp" src="" alt="Loading Photo..." style="width: 40px; height: 40px; border-radius: 50%"/>
-      <H3 id="OP-name"></H3>
+      <h3><a id="OP-name" href="#" style="color: inherit; text-decoration: none;"></a></h3>
       <div id="post-options" class="post-options-menu" style="display: none;">
         <button class="menu-toggle">⋮</button>
         <div class="menu-dropdown" style="display: none;">
@@ -139,7 +139,8 @@
       heart.textContent = isLiked ? "💙" : "🤍";
       heart.style.transform = "scale(1.3)";
       setTimeout(() => heart.style.transform = "scale(1)", 150);
-      like(isLiked); // Call your updated like function
+      like(isLiked);
+      updateLikeCount()
     });
   });
 
@@ -201,6 +202,13 @@
     editInput.value = currentText;
     editBox.style.display = "block";
   });
+
+
+    function goBack() {
+    sessionStorage.removeItem('postId');
+    window.history.back();
+  }
+
 
 </script>
 

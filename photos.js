@@ -145,7 +145,9 @@ function loadPhotoDetails(postId, viewerid, containerSelector = "#post-container
 
                 // fill the fields in the divs
                 pfp.src = data.profilepic;
-                name.textContent = data.username;
+                const opName = document.getElementById("OP-name");
+                opName.textContent = data.username;
+                opName.href = `userarea.html?userid=${data.userid}`;
                 text.textContent = data.text;
                 date.textContent = `Posted on ${data.date}`;
 
@@ -291,6 +293,31 @@ function updateLikeCount() {
 
 
 function submitComment(commentData) {
+    // Create temporary comment data
+    const tempComment = {
+        commentid: 'temp-' + Date.now(),
+        commenttext: commentData.commenttext,
+        date: new Date().toISOString(),
+        username: sessionStorage.getItem('username'),
+        profilepic: sessionStorage.getItem('profilepic'),
+        replies: []
+    };
+
+    // Remove the reply form immediately
+    const replyForm = document.querySelector(`.reply-form[data-parentid="${commentData.response_commentid}"]`);
+    if (replyForm) replyForm.remove();
+
+    // Optimistically render the comment
+    if (commentData.response_commentid) {
+        const parentComment = document.querySelector(`[data-comment-id="${commentData.response_commentid}"]`);
+        if (parentComment) {
+            const repliesContainer = parentComment.querySelector('.comment-replies') ||
+                parentComment.appendChild(document.createElement('div')).classList.add('comment-replies');
+            renderComment(tempComment, repliesContainer);
+        }
+    }
+
+    // Submit to server
     fetch('photos.php?type=insertcomment', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -299,17 +326,28 @@ function submitComment(commentData) {
         .then(res => res.json())
         .then(data => {
             if (data.success === "Yes") {
-                alert("Comment submitted!");
-                const targetId = commentData.response_postid || commentData.response_commentid;
-                loadComments(targetId); // Adjust this function as needed
+                // Replace temporary comment with server data if needed
+                const tempElement = document.querySelector(`[data-comment-id="${tempComment.commentid}"]`);
+                if (tempElement) {
+                    // Update with real data if your server returns the created comment
+                    if (data.comment) {
+                        tempElement.querySelector('.comment-text').textContent = data.comment.commenttext;
+                        tempElement.dataset.commentId = data.comment.commentid;
+                        // Update other fields as needed
+                    }
+                }
             } else {
-                alert(data.message || "Failed to insert comment.");
+                // Remove temporary comment if submission failed
+                document.querySelector(`[data-comment-id="${tempComment.commentid}"]`)?.remove();
+                alert(data.message || "Failed to post comment.");
             }
         })
         .catch(err => {
             console.error("Error submitting comment:", err);
+            document.querySelector(`[data-comment-id="${tempComment.commentid}"]`)?.remove();
         });
 }
+
 
 function formatDate(dateString){
 const date = new Date(dateString);
@@ -324,7 +362,7 @@ function renderComment(commentData, parentContainer) {
     const commentDiv = clone.querySelector('.comment');
 
     commentDiv.dataset.commentId = commentData.commentid;
-    clone.querySelector('.comment-pfp').src = commentData.profilepic;
+    clone.querySelector('.comment-pfp').src = commentData.profilepic || 'default-profile.png';
     clone.querySelector('.comment-username').textContent = commentData.username;
     clone.querySelector('.comment-date').textContent = formatDate(commentData.date);
     clone.querySelector('.comment-text').textContent = commentData.commenttext;
@@ -334,7 +372,6 @@ function renderComment(commentData, parentContainer) {
         showReplyForm(commentData.commentid);
     });
 
-    // Append comment
     parentContainer.appendChild(clone);
 
     // Render replies if any
@@ -345,26 +382,32 @@ function renderComment(commentData, parentContainer) {
 }
 
 function showReplyForm(parentCommentId) {
-    // Prevent duplicate reply forms
     const existing = document.querySelector(`.reply-form[data-parentid="${parentCommentId}"]`);
-    if (existing) return;
+    if (existing) {
+        existing.remove();
+        return;
+    }
 
     const form = document.createElement("div");
     form.classList.add("comment-form", "reply-form");
     form.dataset.responsetype = "comment";
     form.dataset.responseid = parentCommentId;
+    form.dataset.parentid = parentCommentId;
 
     form.innerHTML = `
         <textarea class="comment-input" placeholder="Write a reply..."></textarea>
         <button class="comment-submit">Reply</button>
+        <button class="cancel-reply">Cancel</button>
     `;
 
     const repliesContainer = document.querySelector(`[data-comment-id="${parentCommentId}"] .comment-replies`);
     repliesContainer.appendChild(form);
 
-    // Attach submit logic
-    const button = form.querySelector(".comment-submit");
-    button.addEventListener("click", () => {
+    // Focus the textarea
+    form.querySelector(".comment-input").focus();
+
+    // Submit handler
+    form.querySelector(".comment-submit").addEventListener("click", () => {
         const commenttext = form.querySelector(".comment-input").value.trim();
         const userid = parseInt(sessionStorage.getItem('userid'));
         const response_commentid = parseInt(form.dataset.responseid);
@@ -375,7 +418,11 @@ function showReplyForm(parentCommentId) {
         }
 
         submitComment({ userid, commenttext, response_commentid });
-        form.remove(); // Optionally remove the form after submit
+    });
+
+    // Cancel handler
+    form.querySelector(".cancel-reply").addEventListener("click", () => {
+        form.remove();
     });
 }
 
@@ -390,10 +437,12 @@ function loadComments(postId) {
         .then(data => {
             if (data.success === "Yes" && Array.isArray(data.comments)) {
                 const container = document.querySelector('#comments-section');
-                container.innerHTML = ""; // Clear existing comments
 
-                // Render only top-level comments (responsetype === "post")
-                data.comments.forEach(comment => renderComment(comment, container));
+                // Only clear if we have new comments to show
+                if (data.comments.length > 0) {
+                    container.innerHTML = "";
+                    data.comments.forEach(comment => renderComment(comment, container));
+                }
             } else {
                 console.error("Failed to load comments");
             }

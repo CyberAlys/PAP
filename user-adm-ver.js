@@ -2,11 +2,12 @@
 function CheckLogin()
 {
     //get the tokens
-    var authtoken = localStorage.getItem('authToken');
-    var usertoken= sessionStorage.getItem('username');
-    var idtoken = sessionStorage.getItem("userid");
+    const authtoken = localStorage.getItem('authToken');
+    const usertoken= sessionStorage.getItem('username');
+    const idtoken = sessionStorage.getItem("userid");
+    const username = sessionStorage.getItem("username");
 
-    if(!usertoken && !idtoken && authtoken)
+    if(!usertoken && !idtoken && !username && authtoken)
     {
         fetch('login.php?type=FindUser', {
             method: 'POST' ,
@@ -49,7 +50,7 @@ function CheckLogin()
                 alert('Error grabbing username: ' + error.message);
             });
     }
-    if(!authtoken && !usertoken && !idtoken)
+    if(!authtoken && !usertoken && !username && !idtoken)
     {
         localStorage.clear();
         sessionStorage.clear();

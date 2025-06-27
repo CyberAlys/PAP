@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>User Profile</title>
+    <link rel="stylesheet" href="css/userarea.css" />
+    <script src="photos.js" defer></script>
+    <script src="user-adm-ver.js" defer></script>
+    <script src="profiles.js" defer></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const viewerId = sessionStorage.getItem("userid");
+            const profileUserId = new URLSearchParams(window.location.search).get("userid");
+
+            if (!profileUserId) {
+                alert("User ID is missing from the URL.");
+                window.location.href = "mainpage.html";
+                return;
+            }
+
+            // Load profile info
+            await loadUserInfo(profileUserId);
+
+            // Load posts & liked posts
+            await loadUserPosts(profileUserId);
+            await loadUserLikedPosts(profileUserId);
+
+            // Set up follow/edit button
+            const followBtn = document.getElementById("profile-action-btn");
+            if (viewerId && viewerId !== profileUserId) {
+                const isFollowing = await checkFollowStatus(viewerId, profileUserId);
+                followBtn.textContent = isFollowing ? "Unfollow" : "Follow";
+                followBtn.onclick = async () => {
+                    followBtn.disabled = true;
+                    try {
+                        await toggleFollow(viewerId, profileUserId);
+                    } finally {
+                        followBtn.disabled = false;
+                    }
+                };
+            } else if (viewerId === profileUserId) {
+                followBtn.textContent = "Edit Profile";
+                followBtn.onclick = () => {
+                    window.top.location.href = "settings.html";
+                };
+            }
+
+            document.getElementById("tab-posts").addEventListener("click", () => setActiveTab("posts"));
+            document.getElementById("tab-liked").addEventListener("click", () => setActiveTab("liked"));
+
+        });
+
+        function setActiveTab(tab) {
+            document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+            document.querySelectorAll(".tab-panel").forEach(panel => panel.style.display = "none");
+
+            document.getElementById(`tab-${tab}`).classList.add("active");
+            document.getElementById(`${tab}-section`).style.display = "block";
+        }
+    </script>
+</head>
+<body onload="CheckLogin();">
+<div class="user-header">
+    <img id="userpfp" src="defaultpfp.png" alt="User profile picture" />
+    <h1 id="username">Loading...</h1>
+    <div id="follow-stats">
+        <span id="followers-count">0 followers</span> •
+        <span id="following-count">0 following</span>
+    </div>
+    <button id="profile-action-btn" class="follow-btn">Loading...</button>
+</div>
+
+<div class="tab-bar">
+    <button id="tab-posts" class="tab-button active">Posts</button>
+    <button id="tab-liked" class="tab-button">Liked</button>
+</div>
+
+<div class="tab-content">
+    <div id="posts-section" class="tab-panel"></div>
+    <div id="liked-section" class="tab-panel" style="display: none;"></div>
+</div>
+
+<!-- Post Template -->
+<template id="post-template">
+    <div class="post post-preview">
+        <div class="user-info">
+            <img class="pfp" src="" alt="Profile Picture" />
+            <h3 class="username"></h3>
+        </div>
+        <p class="text"></p>
+        <div class="photo-container">
+            <img class="photo" src="" alt="Post Photo" style="max-width: 100%; height: auto;" />
+        </div>
+    </div>
+</template>
+</body>
+</html>

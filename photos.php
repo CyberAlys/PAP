@@ -40,6 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'editpost':
                 editpost();
                 break;
+            case 'deletecomment':
+                deleteComment();
+                break;
             default:
                 echo json_encode(["message" => "Invalid Action type"]);
         }
@@ -459,22 +462,22 @@ function getcomments() {
     }
 
     try {
-        // Get all comments related to this post (either directly or as replies)
         $sql = "    
-            SELECT 
-                c.commentid,
-                c.commenttext,
-                c.date,
-                c.userid,
-                c.response_postid,
-                c.response_commentid,
-                u.username,
-                u.profilepic
-            FROM comment c
-            JOIN users u ON c.userid = u.userid
-            WHERE c.response_postid = ? OR c.response_commentid IS NOT NULL
-            ORDER BY c.date ASC
-        ";
+        SELECT 
+            c.commentid,
+            c.commenttext,
+            c.date,
+            c.userid,
+            c.is_anonymous,
+            c.response_postid,
+            c.response_commentid,
+            IF(c.userid IS NULL OR c.is_anonymous = 1, 'Anonymous', u.username) AS username,
+            IF(c.userid IS NULL OR c.is_anonymous = 1, 'default_avatar.png', u.profilepic) AS profilepic
+        FROM comment c
+        LEFT JOIN users u ON c.userid = u.userid
+        WHERE c.response_postid = ? OR c.response_commentid IS NOT NULL
+        ORDER BY c.date ASC
+    ";
 
         $stmt = $liga->prepare($sql);
         $stmt->bind_param("i", $postid);
@@ -485,7 +488,6 @@ function getcomments() {
         while ($row = $result->fetch_assoc()) {
             $flatComments[] = $row;
         }
-
 
         $visited = [];
         $nestedComments = buildNestedComments($flatComments, $postid, null, 0, $visited);
@@ -587,6 +589,55 @@ function editpost() {
         $stmt->execute();
 
         echo json_encode(["success" => "Yes"]);
+    } catch (Exception $e) {
+        echo json_encode(["success" => "No", "message" => $e->getMessage()]);
+    }
+}
+
+function deleteComment() {
+    global $liga;
+
+    $input = json_decode(file_get_contents("php://input"), true);
+    $commentId = $input['commentid'] ?? null;
+    $userId = $input['userid'] ?? null;
+
+    if (!$commentId || !$userId) {
+        echo json_encode(["success" => "No", "message" => "Missing parameters"]);
+        return;
+    }
+
+    try {
+        // First check if user is admin
+        $stmt = $liga->prepare("SELECT AdmPin FROM users WHERE userid = ?");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $adminCheck = $stmt->get_result()->fetch_assoc();
+        $isAdmin = !empty($adminCheck); // User exists in admins table
+
+        // Then get comment owner
+        $stmt = $liga->prepare("SELECT userid FROM comment WHERE commentid = ?");
+        $stmt->bind_param("i", $commentId);
+        $stmt->execute();
+        $commentData = $stmt->get_result()->fetch_assoc();
+
+        if (!$commentData) {
+            echo json_encode(["success" => "No", "message" => "Comment not found"]);
+            return;
+        }
+
+        $isOwner = $commentData['userid'] == $userId;
+
+        if (!$isAdmin && !$isOwner) {
+            echo json_encode(["success" => "No", "message" => "Unauthorized"]);
+            return;
+        }
+
+        // Delete the comment
+        $stmt = $liga->prepare("DELETE FROM comment WHERE commentid = ?");
+        $stmt->bind_param("i", $commentId);
+        $stmt->execute();
+
+        echo json_encode(["success" => "Yes", "message" => "Comment deleted"]);
     } catch (Exception $e) {
         echo json_encode(["success" => "No", "message" => $e->getMessage()]);
     }

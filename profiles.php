@@ -1,11 +1,12 @@
 <?php
 include("conexion.php");
-ini_set('display_errors', 1);
 error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', '/path/to/php-error.log');
 
 header('Content-Type: application/json');
 
-DEFINE("logpath", __DIR__ . "/logs/testlogs.log");
 
 // Initialize response array
 $response = ['success' => 'No', 'message' => ''];
@@ -46,6 +47,9 @@ try {
             break;
         case "password":
             $response = updatePassword();
+            break;
+        case "deleteaccount":
+            deleteAccount();
             break;
         default:
             throw new Exception("Invalid request type");
@@ -476,3 +480,142 @@ function updatePassword()
     return ["success" => "Yes", "message" => "Password changed"];
 }
 
+function deleteAccount() {
+    global $liga;
+
+    // Enable error logging but don't display to users
+    ini_set('display_errors', 0);
+    ini_set('log_errors', 1);
+
+    // Get and validate input
+    $rawInput = file_get_contents("php://input");
+    $input = json_decode($rawInput);
+
+    if ($input === null || empty($input->userid) || !isset($input->credential, $input->isAdmin)) {
+        http_response_code(400);
+        echo json_encode(["success" => "No", "message" => "Invalid or missing input data"]);
+        exit;
+    }
+
+    $userid = (int)$input->userid;
+    $credential = trim($input->credential);
+    $isAdmin = filter_var($input->isAdmin, FILTER_VALIDATE_BOOLEAN);
+
+
+    try {
+        // Verify credentials
+        if ($isAdmin) {
+            if (empty($input->admusrid)) {
+                http_response_code(400);
+                echo json_encode(["success" => "No", "message" => "Admin ID missing"]);
+                exit;
+            }
+
+            $admid = (int)$input->admusrid;
+
+            $stmt = $liga->prepare("SELECT AdmPin FROM users WHERE userid = ?");
+            $stmt->bind_param("i", $admid);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+
+            if (empty($row)) {
+                http_response_code(404);
+                echo json_encode(["success" => "No", "message" => "Admin user not found"]);
+                exit;
+            }
+
+            $storedPin = trim($row['AdmPin']);
+            if ((string)$credential !== (string)$storedPin) {
+                http_response_code(403);
+                echo json_encode(["success" => "No", "message" => "Invalid admin PIN"]);
+                exit;
+            }
+        } else {
+
+            $stmt = $liga->prepare("SELECT password FROM users WHERE userid = ?");
+            $stmt->bind_param("i", $userid);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+
+            if (empty($row)) {
+                http_response_code(404);
+                echo json_encode(["success" => "No", "message" => "User not found"]);
+                exit;
+            }
+
+            if (empty($row['password'])) {
+                http_response_code(400);
+                echo json_encode(["success" => "No", "message" => "No password set for this user"]);
+                exit;
+            }
+
+            if (!password_verify($credential, $row['password'])) {
+                http_response_code(403);
+                echo json_encode(["success" => "No", "message" => "Incorrect password"]);
+                exit;
+            }
+        }
+
+        // Begin transaction
+        $liga->begin_transaction();
+
+        try {
+            // 1. Anonymize comments
+            $stmt = $liga->prepare("UPDATE comment SET is_anonymous = 1, userid = NULL WHERE userid = ?");
+            $stmt->bind_param("i", $userid);
+            if (!$stmt->execute()) {
+                throw new Exception("Failed to anonymize comments: " . $stmt->error);
+            }
+
+            // 2. Delete user's posts
+            $stmt = $liga->prepare("DELETE FROM post WHERE userid = ?");
+            $stmt->bind_param("i", $userid);
+            if (!$stmt->execute()) {
+                throw new Exception("Failed to delete posts: " . $stmt->error);
+            }
+
+            // 3. Delete from likes table
+            $stmt = $liga->prepare("DELETE FROM likes WHERE userid = ?");
+            $stmt->bind_param("i", $userid);
+            if (!$stmt->execute()) {
+                throw new Exception("Failed to delete likes: " . $stmt->error);
+            }
+
+            // 4. Delete from followers table
+            $stmt = $liga->prepare("DELETE FROM followers WHERE follower_id = ? OR following_id = ?");
+            $stmt->bind_param("ii", $userid, $userid);
+            if (!$stmt->execute()) {
+                throw new Exception("Failed to delete follower relationships: " . $stmt->error);
+            }
+
+            // 5. Delete user profile
+            $stmt = $liga->prepare("DELETE FROM users WHERE userid = ?");
+            $stmt->bind_param("i", $userid);
+            if (!$stmt->execute()) {
+                throw new Exception("Failed to delete user: " . $stmt->error);
+            }
+
+            $liga->commit();
+
+
+            http_response_code(200);
+            echo json_encode(["success" => "Yes", "message" => "Account deleted successfully"]);
+
+        } catch (Exception $e) {
+            $liga->rollback();
+            throw $e;
+        }
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            "success" => "No",
+            "message" => "Account deletion failed",
+            "error" => $e->getMessage(),
+            "trace" => $e->getTraceAsString()
+        ]);
+    }
+
+    exit;
+}

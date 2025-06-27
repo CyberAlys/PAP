@@ -333,9 +333,9 @@ function submitComment(commentData) {
                     if (data.comment) {
                         tempElement.querySelector('.comment-text').textContent = data.comment.commenttext;
                         tempElement.dataset.commentId = data.comment.commentid;
-                        // Update other fields as needed
                     }
                 }
+                loadComments(sessionStorage.getItem("postId"));
             } else {
                 // Remove temporary comment if submission failed
                 document.querySelector(`[data-comment-id="${tempComment.commentid}"]`)?.remove();
@@ -360,15 +360,59 @@ function renderComment(commentData, parentContainer) {
     const template = document.querySelector('#comment-template');
     const clone = template.content.cloneNode(true);
     const commentDiv = clone.querySelector('.comment');
+    const currentUserId = parseInt(sessionStorage.getItem('userid'));
+    const isAdmin = sessionStorage.getItem('type') === 'adm';
+    const isCommentOwner = currentUserId === commentData.userid;
 
     commentDiv.dataset.commentId = commentData.commentid;
-    clone.querySelector('.comment-pfp').src = commentData.profilepic || 'default-profile.png';
-    clone.querySelector('.comment-username').textContent = commentData.username;
+
+    // Handle profile picture and username
+    const profilePic = commentData.is_anonymous || commentData.userid === null ?
+        'photos/profile_pictures/Default_pfp.jpg' :
+        (commentData.profilepic || 'photos/profile_pictures/Default_pfp.jpg');
+
+    const username = commentData.is_anonymous || commentData.userid === null ?
+        'Anonymous' :
+        commentData.username;
+
+    clone.querySelector('.comment-pfp').src = profilePic;
+    clone.querySelector('.comment-username').textContent = username;
     clone.querySelector('.comment-date').textContent = formatDate(commentData.date);
     clone.querySelector('.comment-text').textContent = commentData.commenttext;
 
-    const replyBtn = clone.querySelector('.reply-button');
-    replyBtn.addEventListener('click', () => {
+    // Set up menu visibility (only show if admin or owner)
+    const menuContainer = clone.querySelector('.comment-options-menu');
+    if (isAdmin || isCommentOwner) {
+        const menuButton = clone.querySelector('.comment-menu-toggle');
+        const dropdown = clone.querySelector('.comment-menu-dropdown');
+
+        menuButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuContainer.classList.toggle('active');
+        });
+
+        // Delete button handler
+        clone.querySelector('.delete-comment').addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete this comment?')) {
+                deleteComment(commentData.commentid);
+            }
+            menuContainer.classList.remove('active');
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', function closeMenu(e) {
+            if (!menuContainer.contains(e.target)) {
+                menuContainer.classList.remove('active');
+                document.removeEventListener('click', closeMenu);
+            }
+        });
+    } else {
+        menuContainer.style.display = 'none';
+    }
+
+    // Set up reply button
+    const replyButton = clone.querySelector('.reply-button');
+    replyButton.addEventListener('click', () => {
         showReplyForm(commentData.commentid);
     });
 
@@ -382,6 +426,7 @@ function renderComment(commentData, parentContainer) {
 }
 
 function showReplyForm(parentCommentId) {
+    // Remove any existing form first
     const existing = document.querySelector(`.reply-form[data-parentid="${parentCommentId}"]`);
     if (existing) {
         existing.remove();
@@ -395,15 +440,30 @@ function showReplyForm(parentCommentId) {
     form.dataset.parentid = parentCommentId;
 
     form.innerHTML = `
-        <textarea class="comment-input" placeholder="Write a reply..."></textarea>
-        <button class="comment-submit">Reply</button>
-        <button class="cancel-reply">Cancel</button>
+        <textarea class="comment-input" placeholder="Write a reply..." autofocus></textarea>
+        <div class="reply-form-buttons">
+            <button class="comment-submit">Reply</button>
+            <button class="cancel-reply">Cancel</button>
+        </div>
     `;
 
-    const repliesContainer = document.querySelector(`[data-comment-id="${parentCommentId}"] .comment-replies`);
+    const parentComment = document.querySelector(`[data-comment-id="${parentCommentId}"]`);
+    if (!parentComment) {
+        console.error("Parent comment not found");
+        return;
+    }
+
+    // Find or create replies container
+    let repliesContainer = parentComment.querySelector('.comment-replies');
+    if (!repliesContainer) {
+        repliesContainer = document.createElement('div');
+        repliesContainer.classList.add('comment-replies');
+        parentComment.appendChild(repliesContainer);
+    }
+
     repliesContainer.appendChild(form);
 
-    // Focus the textarea
+    // Focus the textarea immediately
     form.querySelector(".comment-input").focus();
 
     // Submit handler
@@ -424,6 +484,14 @@ function showReplyForm(parentCommentId) {
     form.querySelector(".cancel-reply").addEventListener("click", () => {
         form.remove();
     });
+
+    // Close when clicking outside
+    document.addEventListener('click', function closeForm(e) {
+        if (!form.contains(e.target) && e.target.className !== 'reply-button') {
+            form.remove();
+            document.removeEventListener('click', closeForm);
+        }
+    }, { once: true });
 }
 
 // Load comments from server
@@ -504,5 +572,33 @@ function saveEditedPost() {
         .catch(err => {
             console.error("Edit error:", err);
             alert("Error editing post.");
+        });
+}
+
+function deleteComment(commentId) {
+    fetch('photos.php?type=deletecomment', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            commentid: commentId,
+            userid: sessionStorage.getItem('userid')
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success === "Yes") {
+                // Remove the comment from DOM
+                const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`);
+                if (commentElement) {
+                    commentElement.remove();
+                }
+                alert("Comment deleted successfully");
+            } else {
+                alert(data.message || "Failed to delete comment");
+            }
+        })
+        .catch(err => {
+            console.error("Error deleting comment:", err);
+            alert("An error occurred while deleting the comment");
         });
 }

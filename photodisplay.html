@@ -104,9 +104,15 @@
 <template id="comment-template">
   <div class="comment" data-comment-id="">
     <div class="comment-header">
-      <img src="" alt="Profile picture" class="comment-pfp" />
+      <img src="photos/profile_pictures/Default_pfp.jpg" alt="Profile picture" class="comment-pfp" />
       <span class="comment-username"></span>
       <span class="comment-date"></span>
+      <div class="comment-options-menu">
+        <button class="comment-menu-toggle">⋮</button>
+        <div class="comment-menu-dropdown">
+          <button class="delete-comment">Delete</button>
+        </div>
+      </div>
     </div>
     <div class="comment-body">
       <p class="comment-text"></p>
@@ -114,11 +120,9 @@
     <div class="comment-actions">
       <button class="reply-button">Reply</button>
     </div>
-    <!-- Replies will be inserted here -->
     <div class="comment-replies"></div>
   </div>
 </template>
-
 
 <hr>
 
@@ -167,6 +171,12 @@
           submitComment({ userid, commenttext, response_commentid: responseid });
         }
         textarea.value = ""; // clear field after submission
+
+        //reply button handler
+
+        const replyBtn = commentDiv.querySelector(".reply-button");
+        replyBtn.addEventListener("click", () => showReplyForm(commentData.commentid));
+
       });
     });
   });

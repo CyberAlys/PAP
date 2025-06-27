@@ -165,3 +165,42 @@ html, body {
     background-color: #444;
 }
 
+.menu-container {
+    position: relative;
+    display: inline-block;
+    margin-left: auto;
+}
+
+.menu-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.menu-dropdown {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: #222;
+    border: 1px solid #555;
+    border-radius: 6px;
+    min-width: 160px;
+    z-index: 100;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.menu-dropdown button {
+    background: none;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
+.menu-dropdown button:hover {
+    background-color: #333;
+}

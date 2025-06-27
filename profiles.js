@@ -325,3 +325,59 @@ async function PasswordChange(userid) {
         showMessage({ success: "No", message: "Password change failed." }, "password-message");
     }
 }
+
+function confirmAccountDeletion() {
+    const admusrid = sessionStorage.getItem("userid");
+    const isAdmin = sessionStorage.getItem("type") === "adm";
+    const message = isAdmin
+        ? "Enter admin PIN to delete this account:"
+        : "Enter your password to delete your account:";
+
+    const credential = prompt(message);
+    if (credential === null) return;
+
+    const profileUserId = new URLSearchParams(window.location.search).get("userid");
+
+    fetch('profiles.php?type=deleteaccount', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify({
+            admusrid: admusrid,
+            userid: profileUserId,
+            credential: credential,
+            isAdmin: isAdmin
+        })
+    })
+        .then(response => {
+            // First check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    throw new Error(`Invalid response: ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success === "Yes") {
+                alert("Account deleted successfully");
+                if (!isAdmin) {
+
+                    sessionStorage.clear();
+                    localStorage.clear();
+                    window.top.location.href = "loginuser.html";
+                } else {
+                    window.top.location.href = "mainpage.html";
+                }
+            } else {
+                alert(data.message || "Failed to delete account");
+            }
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            alert("An error occurred. Please check console for details.");
+        });
+}

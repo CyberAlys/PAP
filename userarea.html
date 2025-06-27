@@ -48,6 +48,19 @@
             document.getElementById("tab-posts").addEventListener("click", () => setActiveTab("posts"));
             document.getElementById("tab-liked").addEventListener("click", () => setActiveTab("liked"));
 
+            const menuContainer = document.getElementById("profile-options-menu");
+            const viewerType = sessionStorage.getItem("type"); // "user" or "admin"
+
+            if (viewerId === profileUserId || viewerType === "adm") {
+                menuContainer.style.display = "inline-block";
+            }
+
+            // Toggle menu visibility
+            document.querySelector(".menu-button").addEventListener("click", () => {
+                const dropdown = document.getElementById("menu-dropdown");
+                dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+            });
+
         });
 
         function setActiveTab(tab) {
@@ -68,6 +81,13 @@
         <span id="following-count">0 following</span>
     </div>
     <button id="profile-action-btn" class="follow-btn">Loading...</button>
+
+    <div class="menu-container" id="profile-options-menu" style="display: none;">
+        <button class="menu-button">⋮</button>
+        <div class="menu-dropdown" id="menu-dropdown" style="display: none;">
+            <button onclick="confirmAccountDeletion()">Delete Account</button>
+        </div>
+    </div>
 </div>
 
 <div class="tab-bar">

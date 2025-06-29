@@ -13,26 +13,39 @@
     {
         try
         {
-            $type = $_GET['type'];
-            if($type == 'Register')
-            {
-                register();
-            }
-            elseif ($type == 'Login')
-            {
-                login();
-            }
-            elseif ($type == 'Relogin')
-            {
-                relogin();
-            }
-            elseif ($type == 'FindUser')
-            {
-                findUser();
-            }
-            else
-            {
-                echo json_encode(["message" => "Invalid Action type"]);
+            $type = $_GET['type'] ?? '';
+
+            switch ($type) {
+                case 'Register':
+                    register();
+                    break;
+                case 'Login':
+                    login();
+                    break;
+                case 'Relogin':
+                    relogin();
+                    break;
+                case 'FindUser':
+                    findUser();
+                    break;
+                case 'PreRegisterValidation':
+                    preRegisterValidation();
+                    break;
+                case 'SendVerification':
+                    sendVerificationEmail();
+                    break;
+                case 'VerifyCode':
+                    verifyEmailCode();
+                    break;
+                case 'sendResetCode':
+                    sendResetCode();
+                    break;
+                case 'resetPassword':
+                    resetPassword();
+                    break;
+                default:
+                    echo json_encode(["message" => "Invalid Action type"]);
+                    break;
             }
         }
         catch (Exception $e)
@@ -97,110 +110,65 @@
         return $row['count'] > 0;
     }
 
-    //registers the user
-     function register()
-    {
-        //grab $liga from connection.php
-        global $liga;
+//registers the user
+function register() {
+    global $liga;
 
-        //define user_type
-        $user_type = "user";
-
-        //grab info from form
-        $username = $_POST['Reg-Username'];
-        $password= $_POST['Reg-Password'];
-        $confpass = $_POST['Reg-confPass'];
-        $name = $_POST['Reg-Name'];
-        $email = $_POST['Reg-Email'];
-        $birthday = $_POST['Reg-Birth'];
-
-        //calculate the age
-        $birthdate = new DateTime($birthday);
-        $today = new DateTime();
-        $age = $today->diff($birthdate)->y;
-
-
-        //verifications
-
-        //username
-        if(UsernameExists($username))
-        {
-            echo json_encode(["message" => "This Username is already in use."]);
-            return;
-        }
-
-        //email
-        if (EmailExists($email))
-        {
-            echo json_encode(["message" => "This Email is already in use."]);
-            return;
-        }
-
-        //age
-        if($age < 17)
-        {
-            echo json_encode(["message" => "You need to be at least 17 to create an account."]);
-            return;
-        }
-
-        if ($age > 110)
-        {
-            echo json_encode(["message" => "Invalid Age, Try verifying the inserted birthdate"]);
-            return;
-        }
-
-        //password
-        if ($password != $confpass)
-        {
-            echo json_encode(["message" => "The password and it's confirmation don't match"]);
-            return;
-        }
-
-        //Password encryption
-        $hashpassword = password_hash($password, PASSWORD_BCRYPT);
-
-        //Default pfp, user will be able to change it in their personal settings
-        $profilepic = "photos/profile_pictures/Default_pfp.jpg";
-
-        //query to insert and the statement that replaces the "?"'s
-        $sql = "INSERT INTO `users` (`userid`, `user_type`, `username`, `password`, `AdmPin`, `profilepic`, `name`, `email`, `birthday`) 
-        VALUES (NULL, ?, ?, ?, NULL, ?, ?, ?, ?);";
-        $stmt =$liga->prepare($sql);
-        $stmt-> bind_param( "sssssss",$user_type, $username,
-            $hashpassword, $profilepic, $name, $email, $birthday);
-
-        if ($stmt->execute())
-        {
-            //if the query is sucessfull it will extract the necessary information to create the tokens in js
-            $userid = $stmt->insert_id;
-            $token = generatetoken($userid);
-
-            $sqltoken = "INSERT INTO `usertoken` (`userid`, `token`) VALUES (?, ?)";
-            $stmttoken = $liga->prepare($sqltoken);
-            $stmttoken-> bind_param("ss", $userid, $token);
-
-            if ($stmttoken->execute())
-            {
-                echo json_encode([
-                    "message" => "Account created successfully",
-                    "token" => $token,
-                    "type" => $user_type,
-                    "username" => $username,
-                    "userid" => $userid,
-                    "pfp" => $profilepic
-                ]);
-            }
-            else
-            {
-                echo json_encode(["message" => "Error creating Tokens", "Error" => $stmttoken->error]);
-            }
-
-        }
-        else
-        {
-            echo json_encode(["message" => "Error creating account", "Error"=> $stmt->error]);
-        }
+    session_start();
+    if (!isset($_SESSION['verified_email']) || $_SESSION['verified_email'] !== $_POST['Reg-Email']) {
+        echo json_encode(["message" => "Email not verified"]);
+        return;
     }
+
+    if (EmailExists($_POST['Reg-Email'])) {
+        echo json_encode(["message" => "This Email is already in use."]);
+        return;
+    }
+
+    // Rest of your existing register function...
+    $user_type = "user";
+    $username = $_POST['Reg-Username'];
+    $password = $_POST['Reg-Password'];
+    $name = $_POST['Reg-Name'];
+    $email = $_POST['Reg-Email'];
+    $birthday = $_POST['Reg-Birth'];
+    $hashpassword = password_hash($password, PASSWORD_BCRYPT);
+    $profilepic = "photos/profile_pictures/Default_pfp.jpg";
+
+    //SQL query
+    $sql = "INSERT INTO `users` (`userid`, `user_type`, `username`, `password`, `AdmPin`, `profilepic`, `name`, `email`, `birthday`, `email_verified`) 
+            VALUES (NULL, ?, ?, ?, NULL, ?, ?, ?, ?, TRUE)";
+
+    $stmt = $liga->prepare($sql);
+    $stmt->bind_param("sssssss", $user_type, $username, $hashpassword, $profilepic, $name, $email, $birthday);
+
+    if ($stmt->execute()) {
+        $userid = $stmt->insert_id;
+        $token = generatetoken($userid);
+
+        $sqltoken = "INSERT INTO `usertoken` (`userid`, `token`) VALUES (?, ?)";
+        $stmttoken = $liga->prepare($sqltoken);
+        $stmttoken->bind_param("ss", $userid, $token);
+
+        if ($stmttoken->execute()) {
+            // Clear verified email from session
+            unset($_SESSION['verified_email']);
+
+            echo json_encode([
+                "message" => "Account created successfully",
+                "token" => $token,
+                "type" => $user_type,
+                "username" => $username,
+                "userid" => $userid,
+                "pfp" => $profilepic
+            ]);
+        } else {
+            echo json_encode(["message" => "Error creating Tokens", "Error" => $stmttoken->error]);
+        }
+    } else {
+        echo json_encode(["message" => "Error creating account", "Error" => $stmt->error]);
+    }
+}
 
     //login function (similar to register so fewer details on comments)
     function login()
@@ -362,3 +330,179 @@
             echo json_encode(["message" => "User not found"]);
         }
     }
+
+function sendVerificationEmail() {
+    require 'vendor/autoload.php'; // Require PHPMailer
+
+    session_start();
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $email = $data['email'];
+    $code = $data['code'];
+
+    // Store in session
+    $_SESSION['verification_code'] = $code;
+    $_SESSION['verification_email'] = $email;
+
+    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+
+    try {
+        // Server settings
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'the.photographerpap@gmail.com';
+        $mail->Password = 'bbyp zddi irkb hurc';
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+
+        // Recipients
+        $mail->setFrom('no-reply@yourdomain.com', 'The Photographer');
+        $mail->addAddress($email);
+
+        // Content
+        $mail->isHTML(true);
+        $mail->Subject = 'Your Verification Code';
+        $mail->Body = "Your verification code is: <b>$code</b>";
+        $mail->AltBody = "Your verification code is: $code";
+
+        $mail->send();
+        echo json_encode(['success' => true]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+function verifyEmailCode() {
+    session_start();
+    $data = json_decode(file_get_contents('php://input'), true);
+    $enteredCode = $data['code'];
+
+    if ($_SESSION['verification_code'] === $enteredCode) {
+        $_SESSION['verified_email'] = $_SESSION['verification_email'];
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false]);
+    }
+}
+
+function preRegisterValidation() {
+    global $liga;
+
+    // Get form data
+    $username = $_POST['Reg-Username'];
+    $password = $_POST['Reg-Password'];
+    $confpass = $_POST['Reg-confPass'];
+    $name = $_POST['Reg-Name'];
+    $birthday = $_POST['Reg-Birth'];
+
+    // Validations
+    if (UsernameExists($username)) {
+        echo json_encode(["success" => false, "message" => "This Username is already in use."]);
+        return;
+    }
+
+    // Calculate age
+    $birthdate = new DateTime($birthday);
+    $today = new DateTime();
+    $age = $today->diff($birthdate)->y;
+
+    if ($age < 17) {
+        echo json_encode(["success" => false, "message" => "You need to be at least 17 to create an account."]);
+        return;
+    }
+
+    if ($age > 110) {
+        echo json_encode(["success" => false, "message" => "Invalid Age, Try verifying the inserted birthdate"]);
+        return;
+    }
+
+    if ($password != $confpass) {
+        echo json_encode(["success" => false, "message" => "The password and its confirmation don't match"]);
+        return;
+    }
+
+    // If all validations pass
+    echo json_encode(["success" => true]);
+}
+
+function sendResetCode() {
+    global $liga;
+    session_start();
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $email = $data['email'];
+    $code = $data['code'];
+
+    // Verify email exists
+    $stmt = $liga->prepare("SELECT userid FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+
+    if ($stmt->get_result()->num_rows === 0) {
+        echo json_encode(['success' => false, 'message' => 'Email not found']);
+        return;
+    }
+
+    // Store code in session
+    $_SESSION['reset_code'] = $code;
+    $_SESSION['reset_email'] = $email;
+
+    // Send email (using your existing PHPMailer setup)
+    require 'vendor/autoload.php';
+    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'the.photographerpap@gmail.com';
+        $mail->Password = 'bbyp zddi irkb hurc';
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+
+        // Recipients
+        $mail->setFrom('no-reply@yourdomain.com', 'The Photographer');
+        $mail->addAddress($email);
+
+        // Content
+        $mail->isHTML(true);
+        $mail->addAddress($email);
+        $mail->Subject = 'Password Reset Code';
+        $mail->Body = "Your password reset code is: <b>$code</b>";
+
+        $mail->send();
+        echo json_encode(['success' => true]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Failed to send email']);
+    }
+}
+function resetPassword() {
+    global $liga;
+    session_start();
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $email = $data['email'];
+    $newPassword = $data['newPassword'];
+
+    // Verify session
+    if (!isset($_SESSION['reset_email']) || $_SESSION['reset_email'] !== $email) {
+        echo json_encode(['success' => false, 'message' => 'Invalid session']);
+        return;
+    }
+
+    // Update password
+    $hashpassword = password_hash($newPassword, PASSWORD_BCRYPT);
+    $stmt = $liga->prepare("UPDATE users SET password = ? WHERE email = ?");
+    $stmt->bind_param("ss", $hashpassword, $email);
+
+    if ($stmt->execute()) {
+        // Clear reset session
+        unset($_SESSION['reset_code']);
+        unset($_SESSION['reset_email']);
+
+        echo json_encode(['success' => true, 'message' => 'Password updated successfully!']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Error updating password']);
+    }
+}

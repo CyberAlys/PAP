@@ -4,13 +4,8 @@
     <meta charset="UTF-8">
     <title>Login | The Photographer</title>
 
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-
-    <!-- CSS -->
     <link href="css/login.css" rel="stylesheet">
-
-    <!-- Scripts -->
     <script src="Loginusers.js" defer></script>
 </head>
 
@@ -25,6 +20,9 @@
     <input type="password" id="log-password" name="log-password" placeholder="Password" required>
     <input type="button" value="Show Password" id="showpasslog" onclick="showPasswordlogin()">
     <input type="submit" value="Log in">
+    <div class="forgot-password">
+        <a href="javascript:showForgotPassword()">Forgot password?</a>
+    </div>
 </form>
 
 <!-- REGISTER FORM -->
@@ -105,7 +103,51 @@
 </div>
 <div id="Overlay"></div>
 
-<!-- MODAL JS -->
+<div id="verification-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h2>Email Verification</h2>
+        <p>We've sent a 6-digit code to your email. Please enter it below:</p>
+        <div class="verification-code">
+            <input type="text" maxlength="1" pattern="\d" class="code-input">
+            <input type="text" maxlength="1" pattern="\d" class="code-input">
+            <input type="text" maxlength="1" pattern="\d" class="code-input">
+            <input type="text" maxlength="1" pattern="\d" class="code-input">
+            <input type="text" maxlength="1" pattern="\d" class="code-input">
+            <input type="text" maxlength="1" pattern="\d" class="code-input">
+        </div>
+        <button onclick="verifyCode()">Verify</button>
+        <p id="verification-message"></p>
+    </div>
+</div>
+
+<div id="forgot-password-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h2>Password Reset</h2>
+        <p>Enter your email to receive a verification code:</p>
+        <input type="email" id="reset-email" placeholder="Your email" required>
+        <button onclick="sendResetCode()">Send Code</button>
+
+        <div id="reset-code-section" style="display:none; margin-top:15px;">
+            <p>Enter the 6-digit code sent to your email:</p>
+            <div class="verification-code">
+                <input type="text" maxlength="1" pattern="\d" class="code-input">
+                <input type="text" maxlength="1" pattern="\d" class="code-input">
+                <input type="text" maxlength="1" pattern="\d" class="code-input">
+                <input type="text" maxlength="1" pattern="\d" class="code-input">
+                <input type="text" maxlength="1" pattern="\d" class="code-input">
+                <input type="text" maxlength="1" pattern="\d" class="code-input">
+            </div>
+            <p>New Password:</p>
+            <input type="password" id="new-password" placeholder="New password" minlength="6" required>
+            <button onclick="verifyResetCode()">Reset Password</button>
+        </div>
+
+        <p id="reset-message" style="margin-top:10px;"></p>
+
+        <button onclick="closeForgotPassword()">Close</button>
+    </div>
+</div>
+
 <script>
     const modal = document.getElementById("Modal");
     const overlay = document.getElementById("Overlay");
@@ -130,6 +172,40 @@
             overlay.style.pointerEvents = "none";
         }
     }
+
+    document.querySelectorAll('.code-input').forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            if (e.target.value.length === 1) {
+                if (index < 5) {
+                    document.querySelectorAll('.code-input')[index + 1].focus();
+                }
+            }
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && e.target.value.length === 0) {
+                if (index > 0) {
+                    document.querySelectorAll('.code-input')[index - 1].focus();
+                }
+            }
+        });
+    });
+
+    // Show forgot password modal
+    function showForgotPassword() {
+        document.getElementById('forgot-password-modal').style.display = 'flex';
+        document.getElementById('Overlay').style.opacity = '1';
+        document.getElementById('Overlay').style.pointerEvents = 'auto';
+    }
+
+    function closeForgotPassword() {
+        document.getElementById('forgot-password-modal').style.display = 'none';
+        document.getElementById('Overlay').style.opacity = '0';
+        document.getElementById('Overlay').style.pointerEvents = 'none';
+    }
+
+
+
 </script>
 
 </body>

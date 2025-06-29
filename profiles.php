@@ -54,11 +54,19 @@ try {
         case 'getfollowlist':
             $response = getfollowlist($data);
             break;
+        case 'getusers':
+            $response = getUsers();
+            break;
+        case 'promoteuser':
+            $response = promoteUser($data);
+            break;
+        case 'demoteuser':
+            $response = demoteUser($data);
+            break;
         default:
             throw new Exception("Invalid request type");
     }
 } catch (Exception $e) {
-    error_log("[" . date('Y-m-d H:i:s') . "] Error: " . $e->getMessage() . "\n", 3, logpath);
     $response = ['success' => 'No', 'message' => $e->getMessage()];
 }
 
@@ -450,9 +458,9 @@ function updatePassword()
 {
     global $liga;
     $input = json_decode(file_get_contents("php://input"), true);
-    $userid       = (int)($input['userid']        ?? 0);
-    $oldpassword  = $input['oldpassword']         ?? "";
-    $newpassword  = $input['newpassword']         ?? "";
+    $userid = (int)($input['userid'] ?? 0);
+    $oldpassword = $input['oldpassword'] ?? "";
+    $newpassword = $input['newpassword']  ?? "";
 
     if (!$userid || !$oldpassword || !$newpassword) {
         return ["success" => "No", "message" => "Missing data"];
@@ -486,11 +494,9 @@ function updatePassword()
 function deleteAccount() {
     global $liga;
 
-    // Enable error logging but don't display to users
     ini_set('display_errors', 0);
     ini_set('log_errors', 1);
 
-    // Get and validate input
     $rawInput = file_get_contents("php://input");
     $input = json_decode($rawInput);
 
@@ -501,6 +507,12 @@ function deleteAccount() {
     }
 
     $userid = (int)$input->userid;
+
+    if($userid == 1)
+    {
+        echo json_encode(["success" => "No", "message" => "Can't delete this account"]);
+        exit;
+    }
     $credential = trim($input->credential);
     $isAdmin = filter_var($input->isAdmin, FILTER_VALIDATE_BOOLEAN);
 
@@ -666,3 +678,162 @@ function getfollowlist($data) {
     return $response;
 }
 
+function getUsers() {
+    global $liga;
+    try {
+        $stmt = $liga->prepare("SELECT userid, username, email, user_type FROM users");
+        $stmt->execute();
+        $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return ['success' => "Yes", 'users' => $users];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => $e->getMessage()];
+    }
+}
+
+function promoteUser($data) {
+    global $liga;
+    try {
+        // Generate random 6-digit PIN
+        $pin = rand(100000, 999999);
+
+        // First get user email before promoting
+        $stmt = $liga->prepare("SELECT email, user_type FROM users WHERE userid = ?");
+        $stmt->bind_param("i", $data['userid']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+
+
+        if (!$user) {
+            throw new Exception("User not found");
+        }
+
+        if($user["user_type"] === "adm")
+        {
+            throw new Exception("Cannot promote an administrator account");
+        }
+
+        // Update user to admin
+        $stmt = $liga->prepare("UPDATE users SET user_type = 'adm', AdmPin = ? WHERE userid = ?");
+        $stmt->bind_param("ii", $pin, $data['userid']);
+        $stmt->execute();
+
+        // Send PIN via email
+        require 'vendor/autoload.php';
+        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+
+        try {
+            // Server settings
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'the.photographerpap@gmail.com';
+            $mail->Password = 'bbyp zddi irkb hurc';
+            $mail->SMTPSecure = 'tls';
+            $mail->Port = 587;
+
+            // Recipients
+            $mail->setFrom('no-reply@thephotographer.com', 'The Photographer');
+            $mail->addAddress($user['email']);
+
+            // Content
+            $mail->isHTML(true);
+            $mail->Subject = 'Your New Admin PIN';
+            $mail->Body = "Congratulations! You've been promoted to admin.<br><br>"
+                . "Your admin PIN is: <strong>$pin</strong><br><br>"
+                . "Please keep this PIN secure as it will be required for admin actions.";
+            $mail->AltBody = "Congratulations! You've been promoted to admin.\n\n"
+                . "Your admin PIN is: $pin\n\n"
+                . "Please keep this PIN secure.";
+
+            $mail->send();
+        } catch (Exception $e) {
+            // Log email error but don't fail the promotion
+            error_log("Email sending failed: " . $e->getMessage());
+        }
+
+        return ['success' => true];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => $e->getMessage()];
+    }
+}
+
+function demoteUser($data) {
+    global $liga;
+    $response = ['success' => false, 'message' => ''];
+
+    try {
+        $userid = $data['admin_id'] ?? null;
+
+        if ($userid == 1) {
+            throw new Exception("Cannot demote head admin");
+        }
+
+        // First get user email before demoting
+        $stmt = $liga->prepare("SELECT email, user_type FROM users WHERE userid = ?");
+        $stmt->bind_param("i", $userid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+
+        if (!$user) {
+            throw new Exception("User not found");
+        }
+
+        if($user["user_type"] === "user")
+        {
+            throw new Exception("Cannot demote a user account");
+        }
+
+        // Demote the user
+        $stmt = $liga->prepare("UPDATE users SET user_type = 'user', AdmPin = NULL WHERE userid = ?");
+        $stmt->bind_param("i", $userid);
+
+        if ($stmt->execute()) {
+            // Send demotion notification
+            require 'vendor/autoload.php';
+            $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+
+            try {
+                // Server settings (same as above)
+                $mail->isSMTP();
+                $mail->Host = 'smtp.gmail.com';
+                $mail->SMTPAuth = true;
+                $mail->Username = 'the.photographerpap@gmail.com';
+                $mail->Password = 'bbyp zddi irkb hurc';
+                $mail->SMTPSecure = 'tls';
+                $mail->Port = 587;
+
+                // Recipients
+                $mail->setFrom('no-reply@thephotographer.com', 'The Photographer');
+                $mail->addAddress($user['email']);
+
+                // Content
+                $mail->isHTML(true);
+                $mail->Subject = 'Admin Status Update';
+                $mail->Body = "Your admin privileges have been removed.<br><br>"
+                    . "You no longer have access to admin features.<br><br>"
+                    . "If this was done in error, please contact the head admin.";
+                $mail->AltBody = "Your admin privileges have been removed.\n\n"
+                    . "You no longer have access to admin features.\n\n"
+                    . "If this was done in error, please contact the head admin.";
+
+                $mail->send();
+            } catch (Exception $e) {
+                // Log email error but don't fail the demotion
+                error_log("Email sending failed: " . $e->getMessage());
+            }
+
+            $response = [
+                'success' => true,
+                'message' => "Admin demoted successfully"
+            ];
+        } else {
+            throw new Exception("Database error: " . $stmt->error);
+        }
+    } catch (Exception $e) {
+        $response['message'] = $e->getMessage();
+    }
+
+    return $response;
+}

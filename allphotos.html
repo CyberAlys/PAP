@@ -13,8 +13,16 @@
         document.addEventListener('DOMContentLoaded', () => {
 
             let currentPage = 1;
+            let currentSort = "date_desc";
 
-            loadFeed(currentPage);
+            loadFeed(currentPage, currentSort);
+
+            document.getElementById("sort-select").addEventListener("change", (e) => {
+                currentSort = e.target.value;
+                currentPage = 1;
+                document.querySelector("#post-feed").innerHTML = ""; // clear feed
+                loadFeed(currentPage, currentSort);
+            });
 
             const feed = document.querySelector("#post-feed");
 
@@ -30,7 +38,7 @@
             const loadMoreBtn = document.getElementById("load-more");
             loadMoreBtn.addEventListener("click", () => {
                 currentPage++;
-                loadFeed(currentPage);
+                loadFeed(currentPage, currentSort);
             });
         });
     </script>
@@ -39,6 +47,15 @@
 
 </head>
 <body>
+<div class="sort-container">
+    <label for="sort-select">Sort by:</label>
+    <select id="sort-select">
+        <option value="date_desc">Newest</option>
+        <option value="date_asc">Oldest</option>
+        <option value="likes_desc">Most Liked</option>
+        <option value="likes_asc">Least Liked</option>
+    </select>
+</div>
 <!-- Post Template (Hidden) -->
 <div class="post post-preview" id="post-template" style="display: none;">
     <div class="user-info">

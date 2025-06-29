@@ -5,6 +5,7 @@
     <title>The Photographer</title>
     <link rel="stylesheet" href="css/mainpage.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="logcheck.js"></script>
     <script src="photos.js" defer></script>
 
@@ -21,11 +22,24 @@
 </div>
 
 <div class="sidebar" id="sidebar">
-    <button onclick="loadIframe('allphotos.html')">Feed</button>
-    <button onclick="loadIframe('photos.html')">Make a Post</button>
-    <button id="search-button" onclick="loadIframe('search.html')">Search</button>
-    <button onclick="openMyProfile()">Profile</button>
-    <button onclick="logout()">Logout</button>
+    <button onclick="loadIframe('allphotos.html')">
+        <i class="fas fa-home"></i> Home Page
+    </button>
+    <button onclick="loadIframe('photos.html')">
+        <i class="fas fa-camera"></i> Make a Post
+    </button>
+    <button id="search-button" onclick="loadIframe('search.html')">
+        <i class="fas fa-search"></i> Search
+    </button>
+    <button onclick="openMyProfile()">
+        <i class="fas fa-user"></i> Profile
+    </button>
+    <button id="admin-button" class="admin-only" onclick="loadIframe('addadm.html')">
+        <i class="fas fa-user-shield"></i> Promote Users
+    </button>
+    <button onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
 </div>
 
 <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
@@ -140,6 +154,10 @@
 
             // pass true to force refresh on header info
             loadHeaderInfo(true);
+        }
+
+        if (!CheckIfUser()) {
+            document.querySelector(".sidebar").classList.add("admin-mode");
         }
 
     });

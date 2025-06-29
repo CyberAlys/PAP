@@ -381,3 +381,145 @@ function confirmAccountDeletion() {
             alert("An error occurred. Please check console for details.");
         });
 }
+
+async function showFollowList(userId, type) {
+    try {
+        const modal = document.getElementById("follow-modal");
+        const title = document.getElementById("modal-title");
+        const list = document.getElementById("follow-list");
+
+        title.textContent = type === "followers" ? "Followers" : "Following";
+        list.innerHTML = "<p>Loading...</p>";
+
+        modal.style.display = "block";
+
+        const data = await fetchData("profiles.php?type=getfollowlist", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userid: userId, listtype: type })
+        });
+
+        if (data.success === "Yes") {
+            list.innerHTML = "";
+
+            if (data.users.length === 0) {
+                list.innerHTML = `<p>No ${type} found</p>`;
+                return;
+            }
+
+            data.users.forEach(user => {
+                const item = document.createElement("div");
+                item.className = "follow-item";
+                item.innerHTML = `
+                    <img src="${user.profilepic || 'defaultpfp.png'}" alt="${user.username}">
+                    <a href="userarea.html?userid=${user.userid}">${user.username}</a>
+                `;
+                list.appendChild(item);
+            });
+        } else {
+            throw new Error(data.message || "Failed to load list");
+        }
+    } catch (err) {
+        console.error("Error loading follow list:", err);
+        document.getElementById("follow-list").innerHTML =
+            `<p>Error loading ${type} list</p>`;
+    }
+}
+
+async function loadUsers() {
+    try {
+        const response = await fetch('profiles.php?type=getusers', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        });
+        const data = await response.json();
+
+        if (data.success && Array.isArray(data.users)) {
+            const userList = document.getElementById('user-list');
+            userList.innerHTML = '';
+
+            data.users.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                userItem.innerHTML = `
+                    <span>${user.username} (${user.user_type === 'adm' ? 'Admin' : 'User'})</span>
+                    <button onclick="selectUser(${user.userid}, this)">
+                        ${user.user_type === 'adm' ? 'Demote' : 'Promote'}
+                    </button>
+                `;
+                userList.appendChild(userItem);
+            });
+
+            // Show/hide demote button based on current user's privileges
+            document.getElementById('demote-button').style.display =
+                currentUserId === "1" ? 'inline-block' : 'none';
+        }
+    } catch (error) {
+        console.error('Error loading users:', error);
+    }
+}
+
+async function promoteUser() {
+    if (!selectedUserId) {
+        alert('Please select a user first');
+        return;
+    }
+
+
+    try {
+        const response = await fetch('profiles.php?type=promoteuser', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userid: selectedUserId
+            })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert(`User promoted successfully!`);
+            loadUsers();
+        } else {
+            throw new Error(result.message || 'Failed to promote user');
+        }
+    } catch (error) {
+        console.error('Promotion error:', error);
+        alert(error.message);
+    }
+}
+
+async function demoteUser() {
+    if (!selectedUserId) {
+        alert('Please select an admin first');
+        return;
+    }
+
+    if (!confirm(`Demote admin with ID ${selectedUserId}?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch('profiles.php?type=demoteuser', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                admin_id: selectedUserId
+            })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert('Admin demoted successfully!');
+            loadUsers();
+
+        } else {
+            throw new Error(result.message || 'Failed to demote admin');
+        }
+    } catch (error) {
+        console.error('Demotion error:', error);
+        alert(error.message);
+    }
+}

@@ -301,12 +301,29 @@ function getfeed()
     try {
         $input = json_decode(file_get_contents("php://input"), true);
         $page = isset($input['page']) ? (int)$input['page'] : 1;
-        $limit = 15; //nmber of posts per page
+        $limit = 15; //number of posts per page
         $offset = ($page - 1) * $limit;
 
-        $sql = "SELECT postid, userid, text, date, photoid 
-        FROM post 
-        ORDER BY date DESC 
+        $sort = $input['sort'] ?? 'date_desc';
+
+        switch ($sort) {
+            case 'date_asc':
+                $orderBy = "date ASC";
+                break;
+            case 'likes_desc':
+                $orderBy = "(SELECT COUNT(*) FROM likes WHERE likes.postid = post.postid) DESC";
+                break;
+            case 'likes_asc':
+                $orderBy = "(SELECT COUNT(*) FROM likes WHERE likes.postid = post.postid) ASC";
+                break;
+            default:
+                $orderBy = "date DESC";
+        }
+
+
+        $sql = "SELECT postid, userid, text, date, photoid
+        FROM post
+        ORDER BY $orderBy
         LIMIT ? OFFSET ?";
         $stmt = $liga->prepare($sql);
         $stmt->bind_param("ii", $limit, $offset);

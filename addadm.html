@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="css/adm.css">
+    <script src="logcheck.js"></script>
+    <script src="profiles.js"></script>
+</head>
+<body onload="CheckLogin()">
+<div class="admin-container">
+
+    <!-- Removed tab buttons since we only have one tab now -->
+
+    <!-- Promote Users Tab (now the only content) -->
+    <div id="promote-tab" class="tab-content active">
+        <h2>Admin Management</h2>
+        <div id="user-list">
+            <p>Loading users...</p>
+        </div>
+        <div class="admin-controls">
+
+            <div class="action-buttons">
+                <button onclick="promoteUser()">Promote User</button>
+                <button id="demote-button" onclick="demoteUser()">Demote Admin</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentUserId = null;
+    let selectedUserId = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        currentUserId = sessionStorage.getItem('userid');
+        await loadUsers();
+
+        if (CheckIfUser()) {
+            alert("Regular users not authorized");
+            window.top.location.href = "mainpage.html";
+        }
+    });
+
+    function selectUser(userId, button) {
+        selectedUserId = userId;
+
+        // Deselect all buttons
+        document.querySelectorAll('.user-item button').forEach(btn => {
+            btn.textContent = 'Select';
+        });
+
+        // Highlight current one
+        button.textContent = 'Selected';
+    }
+</script>
+
+</body>
+</html>

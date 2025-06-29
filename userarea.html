@@ -92,49 +92,7 @@
             document.getElementById(`${tab}-section`).style.display = "block";
         }
 
-        async function showFollowList(userId, type) {
-            try {
-                const modal = document.getElementById("follow-modal");
-                const title = document.getElementById("modal-title");
-                const list = document.getElementById("follow-list");
 
-                title.textContent = type === "followers" ? "Followers" : "Following";
-                list.innerHTML = "<p>Loading...</p>";
-
-                modal.style.display = "block";
-
-                const data = await fetchData("profiles.php?type=getfollowlist", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ userid: userId, listtype: type })
-                });
-
-                if (data.success === "Yes") {
-                    list.innerHTML = "";
-
-                    if (data.users.length === 0) {
-                        list.innerHTML = `<p>No ${type} found</p>`;
-                        return;
-                    }
-
-                    data.users.forEach(user => {
-                        const item = document.createElement("div");
-                        item.className = "follow-item";
-                        item.innerHTML = `
-                    <img src="${user.profilepic || 'defaultpfp.png'}" alt="${user.username}">
-                    <a href="userarea.html?userid=${user.userid}">${user.username}</a>
-                `;
-                        list.appendChild(item);
-                    });
-                } else {
-                    throw new Error(data.message || "Failed to load list");
-                }
-            } catch (err) {
-                console.error("Error loading follow list:", err);
-                document.getElementById("follow-list").innerHTML =
-                    `<p>Error loading ${type} list</p>`;
-            }
-        }
     </script>
 </head>
 <body onload="CheckLogin();">

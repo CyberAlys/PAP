@@ -128,3 +128,12 @@ iframe {
     border: none;
     background-color: #000;
 }
+
+.admin-only {
+    display: none;
+}
+
+/* Show only for admins */
+.admin-mode .admin-only {
+    display: block;
+}

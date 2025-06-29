@@ -197,54 +197,51 @@ function loadPhotoDetails(postId, viewerid, containerSelector = "#post-container
 }
 
 //requests the info to create the feed and populates and clones the div
-function loadFeed(page = 1) {
-        fetch("photos.php?type=getfeed", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({page: page})
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success === "Yes" && Array.isArray(data.posts)) {
-                    const feed = document.querySelector("#post-feed");
-                    const template = document.querySelector("#post-template");
+function loadFeed(page = 1, sortBy = "date_desc") {
+    fetch("photos.php?type=getfeed", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ page, sort: sortBy })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success === "Yes" && Array.isArray(data.posts)) {
+                const feed = document.querySelector("#post-feed");
+                const template = document.querySelector("#post-template");
 
-                    data.posts.forEach(post => {
-                        const clone = template.cloneNode(true);
-                        clone.style.display = "block";
-                        clone.setAttribute("data-postid", post.postid);
+                data.posts.forEach(post => {
+                    const clone = template.cloneNode(true);
+                    clone.style.display = "block";
+                    clone.setAttribute("data-postid", post.postid);
 
-                        clone.querySelector(".pfp").src = post.profilepic;
-                        clone.querySelector(".username").textContent = post.username;
-                        clone.querySelector(".text").textContent = post.text;
+                    clone.querySelector(".pfp").src = post.profilepic;
+                    clone.querySelector(".username").textContent = post.username;
+                    clone.querySelector(".text").textContent = post.text;
 
-                        if (post.photo) {
-                            const img = clone.querySelector(".photo");
-                            img.src = post.path;
-                            img.style.width = "300px";
-                            img.style.height = "300px";
-                        } else {
-                            clone.querySelector(".photo-container").remove();
-                        }
-
-                        feed.appendChild(clone);
-                    });
-
-                    // Hide Load More if fewer than 20 posts returned
-                    if (data.posts.length < 15) {
-                        document.getElementById("load-more").style.display = "none";
+                    if (post.photo) {
+                        const img = clone.querySelector(".photo");
+                        img.src = post.path;
+                        img.style.width = "300px";
+                        img.style.height = "300px";
                     } else {
-                        document.getElementById("load-more").style.display = "block";
+                        clone.querySelector(".photo-container").remove();
                     }
-                } else if (data.success === "No") {
-                    alert(data.message);
-                }
-            })
-            .catch(err => {
-                console.error("Failed to load feed:", err);
-                alert(err);
-            });
+
+                    feed.appendChild(clone);
+                });
+
+                document.getElementById("load-more").style.display =
+                    data.posts.length < 15 ? "none" : "block";
+            } else if (data.success === "No") {
+                alert(data.message);
+            }
+        })
+        .catch(err => {
+            console.error("Failed to load feed:", err);
+            alert(err);
+        });
 }
+
 
 
 function like(isLiked) {

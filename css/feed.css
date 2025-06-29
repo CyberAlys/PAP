@@ -132,3 +132,39 @@ body {
     background-color: #2a2a2a;
     transform: scale(1.02);
 }
+
+.sort-container {
+    text-align: center;
+    margin: 2rem auto;
+    font-family: 'Playfair Display', serif;
+    color: #333;
+}
+
+/* Label */
+.sort-container label {
+    font-size: 1.1rem;
+    margin-right: 0.5rem;
+    color: #fffcfc;
+}
+
+/* Dropdown Styling */
+.sort-container select {
+    padding: 8px 12px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #222;
+    font-family: 'Playfair Display', serif;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.sort-container select:hover {
+    border-color: #888;
+}
+
+.sort-container select:focus {
+    outline: none;
+    border-color: #222;
+}

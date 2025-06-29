@@ -51,6 +51,9 @@ try {
         case "deleteaccount":
             deleteAccount();
             break;
+        case 'getfollowlist':
+            $response = getfollowlist($data);
+            break;
         default:
             throw new Exception("Invalid request type");
     }
@@ -619,3 +622,47 @@ function deleteAccount() {
 
     exit;
 }
+
+function getfollowlist($data) {
+    global $liga;
+    $response = ['success' => 'No'];
+
+    try {
+        $userid = $data['userid'] ?? null;
+        $listtype = $data['listtype'] ?? 'followers';
+
+        if ($listtype === 'followers') {
+            $sql = "SELECT u.userid, u.username, u.profilepic 
+                    FROM users u
+                    JOIN followers f ON u.userid = f.follower_id
+                    WHERE f.following_id = ?";
+        } else {
+            $sql = "SELECT u.userid, u.username, u.profilepic 
+                    FROM users u
+                    JOIN followers f ON u.userid = f.following_id
+                    WHERE f.follower_id = ?";
+        }
+
+        $stmt = $liga->prepare($sql);
+        $stmt->bind_param("i", $userid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $users = [];
+        while ($row = $result->fetch_assoc()) {
+            $users[] = $row;
+        }
+
+        $stmt->close();
+
+        $response = [
+            "success" => "Yes",
+            "users" => $users
+        ];
+    } catch (Exception $e) {
+        $response['message'] = $e->getMessage();
+    }
+
+    return $response;
+}
+

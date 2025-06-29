@@ -496,3 +496,305 @@
 [2025-06-27 23:29:49] type selector called with: getcomments
 [2025-06-27 23:29:49] getcomments() called
 [2025-06-27 23:29:49] getcomments() succeeded
+[2025-06-28 12:03:23] type selector called with: getfeed
+[2025-06-28 12:03:23] getfeed() called
+[2025-06-28 12:03:23] getfeed() failled
+[2025-06-28 12:03:28] type selector called with: getfeed
+[2025-06-28 12:03:28] getfeed() called
+[2025-06-28 12:03:28] getfeed() failled
+[2025-06-28 12:03:35] type selector called with: getfeed
+[2025-06-28 12:03:35] getfeed() called
+[2025-06-28 12:03:35] getfeed() failled
+[2025-06-28 12:04:00] type selector called with: getfeed
+[2025-06-28 12:04:00] getfeed() called
+[2025-06-28 12:04:00] getfeed() failled
+[2025-06-28 12:04:04] type selector called with: getfeed
+[2025-06-28 12:04:04] getfeed() called
+[2025-06-28 12:04:04] getfeed() failled
+[2025-06-28 12:07:53] type selector called with: getfeed
+[2025-06-28 12:07:53] getfeed() called
+[2025-06-28 12:07:53] getfeed() succeeded
+[2025-06-28 12:08:23] type selector called with: saveinserver
+[2025-06-28 12:08:23] saveinserver() called
+[2025-06-28 12:08:23] saveinserver() succeeded
+[2025-06-28 12:08:24] type selector called with: getfeed
+[2025-06-28 12:08:24] getfeed() called
+[2025-06-28 12:08:24] getfeed() succeeded
+[2025-06-28 12:08:29] type selector called with: saveinserver
+[2025-06-28 12:08:29] saveinserver() called
+[2025-06-28 12:08:29] saveinserver() succeeded
+[2025-06-28 12:08:30] type selector called with: getfeed
+[2025-06-28 12:08:30] getfeed() called
+[2025-06-28 12:08:30] getfeed() succeeded
+[2025-06-28 12:08:35] type selector called with: saveinserver
+[2025-06-28 12:08:35] saveinserver() called
+[2025-06-28 12:08:35] saveinserver() succeeded
+[2025-06-28 12:08:36] type selector called with: getfeed
+[2025-06-28 12:08:36] getfeed() called
+[2025-06-28 12:08:36] getfeed() succeeded
+[2025-06-28 12:08:47] type selector called with: saveinserver
+[2025-06-28 12:08:47] saveinserver() called
+[2025-06-28 12:08:47] saveinserver() succeeded
+[2025-06-28 12:08:49] type selector called with: getfeed
+[2025-06-28 12:08:49] getfeed() called
+[2025-06-28 12:08:49] getfeed() succeeded
+[2025-06-28 12:09:06] type selector called with: saveinserver
+[2025-06-28 12:09:06] saveinserver() called
+[2025-06-28 12:09:06] saveinserver() succeeded
+[2025-06-28 12:09:06] type selector called with: getfeed
+[2025-06-28 12:09:06] getfeed() called
+[2025-06-28 12:09:06] getfeed() succeeded
+[2025-06-28 12:11:05] type selector called with: getcomments
+[2025-06-28 12:11:05] getcomments() called
+[2025-06-28 12:11:05] getcomments() succeeded
+[2025-06-28 12:11:05] type selector called with: getphoto
+[2025-06-28 12:11:05] getphoto() called
+[2025-06-28 12:11:05] getphoto() no photo succeeded
+[2025-06-28 12:11:13] type selector called with: editpost
+[2025-06-28 12:11:14] type selector called with: getfeed
+[2025-06-28 12:11:14] getfeed() called
+[2025-06-28 12:11:14] getfeed() succeeded
+[2025-06-28 12:11:15] type selector called with: getphoto
+[2025-06-28 12:11:15] getphoto() called
+[2025-06-28 12:11:15] getphoto() no photo succeeded
+[2025-06-28 12:11:15] type selector called with: getcomments
+[2025-06-28 12:11:15] getcomments() called
+[2025-06-28 12:11:15] getcomments() succeeded
+[2025-06-28 12:11:21] type selector called with: editpost
+[2025-06-28 12:11:22] type selector called with: getfeed
+[2025-06-28 12:11:22] getfeed() called
+[2025-06-28 12:11:22] getfeed() succeeded
+[2025-06-28 12:11:29] type selector called with: saveinserver
+[2025-06-28 12:11:29] saveinserver() called
+[2025-06-28 12:11:29] saveinserver() succeeded
+[2025-06-28 12:11:30] type selector called with: getfeed
+[2025-06-28 12:11:30] getfeed() called
+[2025-06-28 12:11:30] getfeed() succeeded
+[2025-06-28 12:14:46] type selector called with: getfeed
+[2025-06-28 12:14:46] getfeed() called
+[2025-06-28 12:14:46] getfeed() succeeded
+[2025-06-28 12:14:49] type selector called with: getfeed
+[2025-06-28 12:14:49] getfeed() called
+[2025-06-28 12:14:49] getfeed() succeeded
+[2025-06-28 12:15:23] type selector called with: getfeed
+[2025-06-28 12:15:23] getfeed() called
+[2025-06-28 12:15:23] getfeed() succeeded
+[2025-06-28 12:15:25] type selector called with: getphoto
+[2025-06-28 12:15:25] getphoto() called
+[2025-06-28 12:15:25] getphoto() no photo succeeded
+[2025-06-28 12:15:25] type selector called with: getcomments
+[2025-06-28 12:15:25] getcomments() called
+[2025-06-28 12:15:25] getcomments() succeeded
+[2025-06-28 12:15:28] type selector called with: getfeed
+[2025-06-28 12:15:28] getfeed() called
+[2025-06-28 12:15:28] getfeed() succeeded
+[2025-06-28 12:15:31] type selector called with: getphoto
+[2025-06-28 12:15:31] getphoto() called
+[2025-06-28 12:15:31] getphoto() with photo succeeded
+[2025-06-28 12:15:31] type selector called with: getcomments
+[2025-06-28 12:15:31] getcomments() called
+[2025-06-28 12:15:31] getcomments() succeeded
+[2025-06-28 12:15:34] type selector called with: getfeed
+[2025-06-28 12:15:34] getfeed() called
+[2025-06-28 12:15:34] getfeed() succeeded
+[2025-06-28 12:15:37] type selector called with: getphoto
+[2025-06-28 12:15:37] getphoto() called
+[2025-06-28 12:15:37] getphoto() with photo succeeded
+[2025-06-28 12:15:37] type selector called with: getcomments
+[2025-06-28 12:15:37] getcomments() called
+[2025-06-28 12:15:37] getcomments() succeeded
+[2025-06-28 12:15:44] type selector called with: deletecomment
+[2025-06-28 12:15:49] type selector called with: getfeed
+[2025-06-28 12:15:49] getfeed() called
+[2025-06-28 12:15:49] getfeed() succeeded
+[2025-06-28 12:15:53] type selector called with: getphoto
+[2025-06-28 12:15:53] getphoto() called
+[2025-06-28 12:15:53] getphoto() with photo succeeded
+[2025-06-28 12:15:53] type selector called with: getcomments
+[2025-06-28 12:15:53] getcomments() called
+[2025-06-28 12:15:53] getcomments() succeeded
+[2025-06-28 12:15:57] type selector called with: deletecomment
+[2025-06-28 12:16:06] type selector called with: deletecomment
+[2025-06-28 12:16:11] type selector called with: getfeed
+[2025-06-28 12:16:11] getfeed() called
+[2025-06-28 12:16:11] getfeed() succeeded
+[2025-06-28 12:16:13] type selector called with: getcomments
+[2025-06-28 12:16:13] getcomments() called
+[2025-06-28 12:16:13] getcomments() succeeded
+[2025-06-28 12:16:13] type selector called with: getphoto
+[2025-06-28 12:16:13] getphoto() called
+[2025-06-28 12:16:13] getphoto() with photo succeeded
+[2025-06-28 12:17:57] type selector called with: getfeed
+[2025-06-28 12:17:57] getfeed() called
+[2025-06-28 12:17:57] getfeed() succeeded
+[2025-06-28 12:18:01] type selector called with: getfeed
+[2025-06-28 12:18:01] getfeed() called
+[2025-06-28 12:18:01] getfeed() succeeded
+[2025-06-28 14:34:34] type selector called with: getfeed
+[2025-06-28 14:34:34] getfeed() called
+[2025-06-28 14:34:34] getfeed() succeeded
+[2025-06-28 14:34:53] type selector called with: getfeed
+[2025-06-28 14:34:53] getfeed() called
+[2025-06-28 14:34:53] getfeed() succeeded
+[2025-06-28 14:35:59] type selector called with: getfeed
+[2025-06-28 14:35:59] getfeed() called
+[2025-06-28 14:35:59] getfeed() succeeded
+[2025-06-28 16:11:58] type selector called with: getfeed
+[2025-06-28 16:11:58] getfeed() called
+[2025-06-28 16:11:58] getfeed() succeeded
+[2025-06-28 16:12:04] type selector called with: search
+[2025-06-28 16:12:34] type selector called with: getfeed
+[2025-06-28 16:12:34] getfeed() called
+[2025-06-28 16:12:34] getfeed() succeeded
+[2025-06-28 16:21:59] type selector called with: getfeed
+[2025-06-28 16:21:59] getfeed() called
+[2025-06-28 16:21:59] getfeed() succeeded
+[2025-06-28 16:22:13] type selector called with: search
+[2025-06-28 16:22:16] type selector called with: search
+[2025-06-28 16:22:22] type selector called with: search
+[2025-06-28 16:24:09] type selector called with: getfeed
+[2025-06-28 16:24:09] getfeed() called
+[2025-06-28 16:24:09] getfeed() succeeded
+[2025-06-28 16:24:17] type selector called with: search
+[2025-06-28 16:24:56] type selector called with: search
+[2025-06-28 16:24:59] type selector called with: search
+[2025-06-28 16:29:57] type selector called with: getfeed
+[2025-06-28 16:29:57] getfeed() called
+[2025-06-28 16:29:57] getfeed() succeeded
+[2025-06-28 16:30:06] type selector called with: search
+[2025-06-28 16:30:10] type selector called with: search
+[2025-06-28 16:31:21] type selector called with: search
+[2025-06-28 16:40:07] type selector called with: getfeed
+[2025-06-28 16:40:07] getfeed() called
+[2025-06-28 16:40:07] getfeed() succeeded
+[2025-06-28 16:40:17] type selector called with: search
+[2025-06-28 16:40:25] type selector called with: search
+[2025-06-28 16:40:26] type selector called with: search
+[2025-06-28 16:40:27] type selector called with: search
+[2025-06-28 16:40:28] type selector called with: search
+[2025-06-28 16:40:29] type selector called with: search
+[2025-06-28 16:40:36] type selector called with: search
+[2025-06-28 16:40:39] type selector called with: search
+[2025-06-28 16:40:39] type selector called with: search
+[2025-06-28 16:40:39] type selector called with: search
+[2025-06-28 16:40:40] type selector called with: getfeed
+[2025-06-28 16:40:40] getfeed() called
+[2025-06-28 16:40:40] getfeed() succeeded
+[2025-06-28 16:40:48] type selector called with: search
+[2025-06-28 16:40:57] type selector called with: search
+[2025-06-28 16:40:57] type selector called with: search
+[2025-06-28 16:41:03] type selector called with: search
+[2025-06-28 16:41:04] type selector called with: search
+[2025-06-28 16:41:05] type selector called with: search
+[2025-06-28 16:41:05] type selector called with: search
+[2025-06-28 16:41:06] type selector called with: search
+[2025-06-28 16:41:31] type selector called with: search
+[2025-06-28 16:41:32] type selector called with: search
+[2025-06-28 16:49:11] type selector called with: getfeed
+[2025-06-28 16:49:11] getfeed() called
+[2025-06-28 16:49:11] getfeed() succeeded
+[2025-06-28 16:50:05] type selector called with: search
+[2025-06-28 20:04:50] type selector called with: getfeed
+[2025-06-28 20:04:50] getfeed() called
+[2025-06-28 20:04:50] getfeed() succeeded
+[2025-06-28 20:04:54] type selector called with: getphoto
+[2025-06-28 20:04:54] getphoto() called
+[2025-06-28 20:04:54] getphoto() with photo succeeded
+[2025-06-28 20:04:54] type selector called with: getcomments
+[2025-06-28 20:04:54] getcomments() called
+[2025-06-28 20:04:54] getcomments() succeeded
+[2025-06-28 20:04:57] type selector called with: getfeed
+[2025-06-28 20:04:57] getfeed() called
+[2025-06-28 20:04:57] getfeed() succeeded
+[2025-06-28 20:04:59] type selector called with: getphoto
+[2025-06-28 20:04:59] getphoto() called
+[2025-06-28 20:04:59] getphoto() with photo succeeded
+[2025-06-28 20:04:59] type selector called with: getcomments
+[2025-06-28 20:04:59] getcomments() called
+[2025-06-28 20:04:59] getcomments() succeeded
+[2025-06-28 20:05:01] type selector called with: getfeed
+[2025-06-28 20:05:01] getfeed() called
+[2025-06-28 20:05:01] getfeed() succeeded
+[2025-06-28 20:05:06] type selector called with: getphoto
+[2025-06-28 20:05:06] getphoto() called
+[2025-06-28 20:05:06] getphoto() with photo succeeded
+[2025-06-28 20:05:06] type selector called with: getcomments
+[2025-06-28 20:05:06] getcomments() called
+[2025-06-28 20:05:06] getcomments() succeeded
+[2025-06-28 20:05:10] type selector called with: getfeed
+[2025-06-28 20:05:10] getfeed() called
+[2025-06-28 20:05:10] getfeed() succeeded
+[2025-06-28 20:08:02] type selector called with: getfeed
+[2025-06-28 20:08:02] getfeed() called
+[2025-06-28 20:08:02] getfeed() succeeded
+[2025-06-28 20:08:58] type selector called with: getfeed
+[2025-06-28 20:08:58] getfeed() called
+[2025-06-28 20:08:58] getfeed() succeeded
+[2025-06-28 20:09:05] type selector called with: search
+[2025-06-28 20:09:15] type selector called with: getcomments
+[2025-06-28 20:09:15] getcomments() called
+[2025-06-28 20:09:15] getcomments() succeeded
+[2025-06-28 20:09:15] type selector called with: getphoto
+[2025-06-28 20:09:15] getphoto() called
+[2025-06-28 20:09:15] getphoto() no photo succeeded
+[2025-06-28 20:09:18] type selector called with: search
+[2025-06-28 20:10:09] type selector called with: getfeed
+[2025-06-28 20:10:09] getfeed() called
+[2025-06-28 20:10:09] getfeed() succeeded
+[2025-06-28 20:15:41] type selector called with: getfeed
+[2025-06-28 20:15:41] getfeed() called
+[2025-06-28 20:15:41] getfeed() succeeded
+[2025-06-28 20:16:54] type selector called with: getfeed
+[2025-06-28 20:16:54] getfeed() called
+[2025-06-28 20:16:54] getfeed() succeeded
+[2025-06-28 20:17:10] type selector called with: getfeed
+[2025-06-28 20:17:10] getfeed() called
+[2025-06-28 20:17:10] getfeed() succeeded
+[2025-06-28 20:17:12] type selector called with: getphoto
+[2025-06-28 20:17:12] getphoto() called
+[2025-06-28 20:17:12] getphoto() no photo succeeded
+[2025-06-28 20:17:12] type selector called with: getcomments
+[2025-06-28 20:17:12] getcomments() called
+[2025-06-28 20:17:12] getcomments() succeeded
+[2025-06-28 20:17:14] type selector called with: getfeed
+[2025-06-28 20:17:14] getfeed() called
+[2025-06-28 20:17:14] getfeed() succeeded
+[2025-06-28 20:17:36] type selector called with: getfeed
+[2025-06-28 20:17:36] getfeed() called
+[2025-06-28 20:17:36] getfeed() succeeded
+[2025-06-28 20:19:16] type selector called with: search
+[2025-06-28 20:19:33] type selector called with: getfeed
+[2025-06-28 20:19:33] getfeed() called
+[2025-06-28 20:19:33] getfeed() succeeded
+[2025-06-28 20:19:42] type selector called with: search
+[2025-06-28 20:19:51] type selector called with: search
+[2025-06-28 20:19:58] type selector called with: search
+[2025-06-28 20:20:21] type selector called with: getfeed
+[2025-06-28 20:20:21] getfeed() called
+[2025-06-28 20:20:21] getfeed() succeeded
+[2025-06-28 20:20:31] type selector called with: search
+[2025-06-28 20:20:55] type selector called with: getcomments
+[2025-06-28 20:20:55] getcomments() called
+[2025-06-28 20:20:55] getcomments() succeeded
+[2025-06-28 20:20:55] type selector called with: getphoto
+[2025-06-28 20:20:55] getphoto() called
+[2025-06-28 20:20:55] getphoto() with photo succeeded
+[2025-06-28 20:20:59] type selector called with: search
+[2025-06-28 20:21:03] type selector called with: search
+[2025-06-28 20:21:09] type selector called with: getphoto
+[2025-06-28 20:21:09] getphoto() called
+[2025-06-28 20:21:09] getphoto() no photo succeeded
+[2025-06-28 20:21:09] type selector called with: getcomments
+[2025-06-28 20:21:09] getcomments() called
+[2025-06-28 20:21:09] getcomments() succeeded
+[2025-06-28 20:22:20] type selector called with: search
+[2025-06-28 20:22:29] type selector called with: getfeed
+[2025-06-28 20:22:29] getfeed() called
+[2025-06-28 20:22:29] getfeed() succeeded
+[2025-06-28 20:35:16] type selector called with: search
+[2025-06-29 00:49:50] type selector called with: getfeed
+[2025-06-29 00:49:50] getfeed() called
+[2025-06-29 00:49:50] getfeed() succeeded
+[2025-06-29 00:49:57] type selector called with: getfeed
+[2025-06-29 00:49:57] getfeed() called
+[2025-06-29 00:49:57] getfeed() succeeded

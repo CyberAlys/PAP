@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Search | The Photographer</title>
+    <link rel="stylesheet" href="css/search.css">
+    <script src="photos.js" defer></script>
+</head>
+<body>
+
+<button onclick="window.history.back()">←Go Back</button>
+
+<h1>Search</h1>
+
+<input type="text" id="search-input" placeholder="Search posts or users..." />
+<button onclick="performSearch()">Search</button>
+
+<div class="tab-container">
+    <div class="tab active" data-tab="users">Accounts</div>
+    <div class="tab" data-tab="posts">Posts</div>
+</div>
+
+<div id="users-results" class="tab-content active">
+    <div class="no-results">Search for users above</div>
+</div>
+
+<div id="posts-results" class="tab-content">
+    <div class="no-results">Search for posts above</div>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        // Update tab styling
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
+
+        // Update content visibility
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        document.getElementById(`${tabName}-results`).classList.add('active');
+    }
+
+    // Initialize tab click handlers
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                switchTab(tab.dataset.tab);
+            });
+        });
+    });
+
+
+</script>
+
+</body>
+</html>

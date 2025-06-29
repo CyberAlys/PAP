@@ -43,6 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'deletecomment':
                 deleteComment();
                 break;
+            case 'search':
+                search();
+                break;
             default:
                 echo json_encode(["message" => "Invalid Action type"]);
         }
@@ -296,8 +299,18 @@ function getfeed()
     }
 
     try {
-        $sql = "SELECT postid, userid, text, date, photoid FROM post ORDER BY date DESC LIMIT 20";
+        $input = json_decode(file_get_contents("php://input"), true);
+        $page = isset($input['page']) ? (int)$input['page'] : 1;
+        $limit = 15; //nmber of posts per page
+        $offset = ($page - 1) * $limit;
+
+        $sql = "SELECT postid, userid, text, date, photoid 
+        FROM post 
+        ORDER BY date DESC 
+        LIMIT ? OFFSET ?";
         $stmt = $liga->prepare($sql);
+        $stmt->bind_param("ii", $limit, $offset);
+
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -313,7 +326,7 @@ function getfeed()
             // Get user info
             $sql_user = "SELECT username, profilepic FROM users WHERE userid = ?";
             $stmt_user = $liga->prepare($sql_user);
-            $stmt_user->bind_param("s", $userid);
+            $stmt_user->bind_param("i", $userid);
             $stmt_user->execute();
             $stmt_user->bind_result($username, $profilepic);
             $stmt_user->fetch();
@@ -640,5 +653,51 @@ function deleteComment() {
         echo json_encode(["success" => "Yes", "message" => "Comment deleted"]);
     } catch (Exception $e) {
         echo json_encode(["success" => "No", "message" => $e->getMessage()]);
+    }
+}
+
+function search() {
+    global $liga;
+    $input = json_decode(file_get_contents("php://input"), true);
+    $query = $input['query'] ?? '';
+
+    if (!$query) {
+        echo json_encode(["success" => "No", "message" => "Empty search query"]);
+        return;
+    }
+
+    try {
+        $sql_users = "SELECT userid, username, profilepic FROM users 
+                     WHERE username LIKE CONCAT('%', ?, '%')";
+        $stmt_users = $liga->prepare($sql_users);
+        $stmt_users->bind_param("s", $query);
+        $stmt_users->execute();
+        $users = $stmt_users->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt_users->close();
+
+
+        $sql_posts = "SELECT p.postid, p.text, p.photoid, ph.filepath as path,
+                     u.username, u.profilepic
+              FROM post p
+              LEFT JOIN photos ph ON p.photoid = ph.photoid
+              INNER JOIN users u ON p.userid = u.userid
+              WHERE p.text LIKE CONCAT('%', ?, '%')";
+        $stmt_posts = $liga->prepare($sql_posts);
+        $stmt_posts->bind_param("s", $query);
+        $stmt_posts->execute();
+        $posts = $stmt_posts->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt_posts->close();
+
+        echo json_encode([
+            "success" => "Yes",
+            "users" => $users,
+            "posts" => $posts
+        ]);
+    } catch (Exception $e) {
+        error_log("Search error: " . $e->getMessage());
+        echo json_encode([
+            "success" => "No",
+            "message" => "An error occurred during search"
+        ]);
     }
 }

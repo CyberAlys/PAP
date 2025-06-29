@@ -197,64 +197,55 @@ function loadPhotoDetails(postId, viewerid, containerSelector = "#post-container
 }
 
 //requests the info to create the feed and populates and clones the div
-function loadFeed() {
-    const page = 1;
-
-    console.log("js called");
-
-    fetch("photos.php?type=getfeed", {
-        method: "POST",
-        headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ page: page })
-    })
-        .then(response => {
-            if (!response.ok)  console.error('Network response was not ok');
-            return response.json();})
-        .then(data => {
-            if (data.success === "Yes" && Array.isArray(data.posts)) {
-                //grabs the div and puts into vars
-                const feed = document.querySelector("#post-feed");
-                const template = document.querySelector("#post-template");
-
-                //for each item in the array
-                data.posts.forEach(post => {
-                    //grabs template and clones it
-                    const clone = template.cloneNode(true);
-                    clone.style.display = "block";
-
-                    //stores the id
-                    clone.setAttribute("data-postid", post.postid);
-
-                    //populates clones
-                    clone.querySelector(".pfp").src = post.profilepic;
-                    clone.querySelector(".username").textContent = post.username;
-                    clone.querySelector(".text").textContent = post.text;
-
-                    //populate photos in case there's one if not hides the img
-                    if (post.photo) {
-                        const img = clone.querySelector(".photo");
-                        img.src = post.path;
-                        img.style.width = "300px";
-                        img.style.height = "300px";
-                    } else {
-                        clone.querySelector(".photo-container").remove(); // remove image box if no photo
-                    }
-
-                    feed.appendChild(clone);
-                });
-            }
-            else if(data.success === "No")
-            {
-                alert(data.message)
-            }
+function loadFeed(page = 1) {
+        fetch("photos.php?type=getfeed", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({page: page})
         })
-    .catch(err => {
-         console.error("Failed to load feed:", err);
-         alert(err);
-    });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success === "Yes" && Array.isArray(data.posts)) {
+                    const feed = document.querySelector("#post-feed");
+                    const template = document.querySelector("#post-template");
+
+                    data.posts.forEach(post => {
+                        const clone = template.cloneNode(true);
+                        clone.style.display = "block";
+                        clone.setAttribute("data-postid", post.postid);
+
+                        clone.querySelector(".pfp").src = post.profilepic;
+                        clone.querySelector(".username").textContent = post.username;
+                        clone.querySelector(".text").textContent = post.text;
+
+                        if (post.photo) {
+                            const img = clone.querySelector(".photo");
+                            img.src = post.path;
+                            img.style.width = "300px";
+                            img.style.height = "300px";
+                        } else {
+                            clone.querySelector(".photo-container").remove();
+                        }
+
+                        feed.appendChild(clone);
+                    });
+
+                    // Hide Load More if fewer than 20 posts returned
+                    if (data.posts.length < 15) {
+                        document.getElementById("load-more").style.display = "none";
+                    } else {
+                        document.getElementById("load-more").style.display = "block";
+                    }
+                } else if (data.success === "No") {
+                    alert(data.message);
+                }
+            })
+            .catch(err => {
+                console.error("Failed to load feed:", err);
+                alert(err);
+            });
 }
+
 
 function like(isLiked) {
     const postId = sessionStorage.getItem("postId");
@@ -601,4 +592,95 @@ function deleteComment(commentId) {
             console.error("Error deleting comment:", err);
             alert("An error occurred while deleting the comment");
         });
+}
+
+function performSearch() {
+    const query = document.getElementById("search-input").value.trim();
+
+    if (!query) {
+        alert("Please enter a search term.");
+        return;
+    }
+    const searchBtn = document.querySelector('button[onclick="performSearch()"]');
+    searchBtn.disabled = true;
+    searchBtn.textContent = "Searching...";
+
+    fetch('photos.php?type=search', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: query })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success === "Yes") {
+                displayUsers(data.users || []);
+                displayPosts(data.posts || []);
+            } else {
+                alert(data.message || "Search failed");
+            }
+        })
+        .catch(err => {
+            console.error("Search error:", err);
+            alert("An error occurred while searching.");
+        })
+        .finally(() => {
+        // Reset button state
+        searchBtn.disabled = false;
+        searchBtn.textContent = "Search";
+        });
+}
+
+function displayUsers(users) {
+    const container = document.getElementById("users-results");
+
+    if (users.length === 0) {
+        container.innerHTML = '<div class="no-results">No users found</div>';
+        return;
+    }
+
+    container.innerHTML = '';
+    users.forEach(user => {
+        const userDiv = document.createElement("div");
+        userDiv.className = "result-item user-result";
+        userDiv.innerHTML = `
+            <img src="${user.profilepic || 'photos/profile_pictures/Default_pfp.jpg'}" alt="${user.username}">
+            <div class="user-info">
+                <h3><a href="userarea.html?userid=${user.userid}">${user.username}</a></h3>
+            </div>
+        `;
+        container.appendChild(userDiv);
+    });
+}
+
+function displayPosts(posts) {
+    const container = document.getElementById("posts-results");
+
+    if (posts.length === 0) {
+        container.innerHTML = '<div class="no-results">No posts found</div>';
+        return;
+    }
+
+    container.innerHTML = '';
+    posts.forEach(post => {
+        const postDiv = document.createElement("div");
+        postDiv.className = "result-item post-result";
+        postDiv.innerHTML = `
+            <div class="post-preview">
+                <div class="user-info">
+                    <img src="${post.profilepic || 'photos/profile_pictures/Default_pfp.jpg'}" alt="${post.username}">
+                    <span>${post.username}</span>
+                </div>
+                ${post.text ? `<p>${post.text}</p>` : ''}
+                ${post.path ? `<img src="${post.path}" alt="Post image" style="max-width: 200px;">` : ''}
+            </div>
+        `;
+
+        // Click handler for the entire post div
+        postDiv.addEventListener('click', () => {
+            sessionStorage.setItem('postId', post.postid);
+            window.location.href = 'photodisplay.html';
+        });
+
+        container.appendChild(postDiv);
+    });
 }

@@ -7,17 +7,16 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 
-    <!-- JS -->
     <script src="photos.js" defer></script>
     <script>
+
         document.addEventListener('DOMContentLoaded', () => {
-            loadFeed();
+
+            let currentPage = 1;
+
+            loadFeed(currentPage);
 
             const feed = document.querySelector("#post-feed");
-            if (!feed) {
-                console.error("#post-feed not found!");
-                return;
-            }
 
             feed.addEventListener("click", function (e) {
                 const postElement = e.target.closest(".post");
@@ -26,11 +25,18 @@
                     IDSubmit(postId);
                 }
             });
+
+            // Load more button logic
+            const loadMoreBtn = document.getElementById("load-more");
+            loadMoreBtn.addEventListener("click", () => {
+                currentPage++;
+                loadFeed(currentPage);
+            });
         });
     </script>
 
-    <!-- Styles -->
     <link rel="stylesheet" href="css/feed.css">
+
 </head>
 <body>
 <!-- Post Template (Hidden) -->
@@ -47,5 +53,8 @@
 
 <!-- Feed Container -->
 <div id="post-feed"></div>
+
+<button id="load-more" style="display: block; margin: 2rem auto;">Load More</button>
+
 </body>
 </html>

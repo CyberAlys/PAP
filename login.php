@@ -484,10 +484,15 @@ function resetPassword() {
     $data = json_decode(file_get_contents('php://input'), true);
     $email = $data['email'];
     $newPassword = $data['newPassword'];
+    $code = $data['code']; // <- added
 
-    // Verify session
-    if (!isset($_SESSION['reset_email']) || $_SESSION['reset_email'] !== $email) {
-        echo json_encode(['success' => false, 'message' => 'Invalid session']);
+    // Verify session and code
+    if (
+        !isset($_SESSION['reset_email'], $_SESSION['reset_code']) ||
+        $_SESSION['reset_email'] !== $email ||
+        $_SESSION['reset_code'] !== $code
+    ) {
+        echo json_encode(['success' => false, 'message' => 'Invalid reset code or session']);
         return;
     }
 

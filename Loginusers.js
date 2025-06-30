@@ -394,10 +394,10 @@ function verifyResetCode() {
         return;
     }
 
-    fetch('login.php?type=resetPassword', {
+  fetch('login.php?type=resetPassword', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: resetEmail, newPassword })
+        body: JSON.stringify({ email: resetEmail, newPassword: newPassword, code: enteredCode})
     })
         .then(response => response.json())
         .then(data => {

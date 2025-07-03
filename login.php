@@ -331,47 +331,24 @@ function register() {
         }
     }
 
-function sendVerificationEmail() {
-    require 'vendor/autoload.php'; // Require PHPMailer
+    function sendVerificationEmail() {
+        require_once 'mail_send.php';
+        session_start();
 
-    session_start();
+        $data = json_decode(file_get_contents('php://input'), true);
+        $email = $data['email'];
+        $code = $data['code'];
 
-    $data = json_decode(file_get_contents('php://input'), true);
-    $email = $data['email'];
-    $code = $data['code'];
+        // Store in session
+        $_SESSION['verification_code'] = $code;
+        $_SESSION['verification_email'] = $email;
 
-    // Store in session
-    $_SESSION['verification_code'] = $code;
-    $_SESSION['verification_email'] = $email;
+        $subject = 'Your Verification Code';
+        $body = "Your verification code is: <b>$code</b>";
+        $result = sendMail($email, $subject, $body);
 
-    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
-
-    try {
-        // Server settings
-        $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'the.photographerpap@gmail.com';
-        $mail->Password = 'bbyp zddi irkb hurc';
-        $mail->SMTPSecure = 'tls';
-        $mail->Port = 587;
-
-        // Recipients
-        $mail->setFrom('no-reply@yourdomain.com', 'The Photographer');
-        $mail->addAddress($email);
-
-        // Content
-        $mail->isHTML(true);
-        $mail->Subject = 'Your Verification Code';
-        $mail->Body = "Your verification code is: <b>$code</b>";
-        $mail->AltBody = "Your verification code is: $code";
-
-        $mail->send();
-        echo json_encode(['success' => true]);
-    } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        echo json_encode($result);
     }
-}
 
 function verifyEmailCode() {
     session_start();
@@ -428,6 +405,7 @@ function preRegisterValidation() {
 
 function sendResetCode() {
     global $liga;
+    require_once 'mail_send.php';
     session_start();
 
     $data = json_decode(file_get_contents('php://input'), true);
@@ -448,35 +426,13 @@ function sendResetCode() {
     $_SESSION['reset_code'] = $code;
     $_SESSION['reset_email'] = $email;
 
-    // Send email (using your existing PHPMailer setup)
-    require 'vendor/autoload.php';
-    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+    $subject = 'Password Reset Code';
+    $body = "Your password reset code is: <b>$code</b>";
+    $result = sendMail($email, $subject, $body);
 
-    try {
-        $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'the.photographerpap@gmail.com';
-        $mail->Password = 'bbyp zddi irkb hurc';
-        $mail->SMTPSecure = 'tls';
-        $mail->Port = 587;
-
-        // Recipients
-        $mail->setFrom('no-reply@yourdomain.com', 'The Photographer');
-        $mail->addAddress($email);
-
-        // Content
-        $mail->isHTML(true);
-        $mail->addAddress($email);
-        $mail->Subject = 'Password Reset Code';
-        $mail->Body = "Your password reset code is: <b>$code</b>";
-
-        $mail->send();
-        echo json_encode(['success' => true]);
-    } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => 'Failed to send email']);
-    }
+    echo json_encode($result);
 }
+
 function resetPassword() {
     global $liga;
     session_start();

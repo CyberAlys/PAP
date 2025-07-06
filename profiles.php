@@ -721,9 +721,6 @@ function promoteUser($data) {
         $stmt->execute();
 
         // Send PIN via email
-        
-        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
-
         try {
             $subject = 'Your New Admin PIN';
             $body = "Congratulations! You've been promoted to admin.<br><br>Your admin PIN is: <strong>$pin</strong><br><br>Please keep this PIN secure as it will be required for admin actions.";
@@ -775,8 +772,6 @@ function demoteUser($data) {
 
         if ($stmt->execute()) {
             // Send demotion notification
-            $mail = new PHPMailer\PHPMailer\PHPMailer(true);
-
             try {
                 $subject = 'Admin Status Update';
                 $body = "Your admin privileges have been removed.<br><br>You no longer have access to admin features.<br><br>If this was done in error, please contact the head admin.";

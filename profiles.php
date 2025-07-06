@@ -1,5 +1,7 @@
 <?php
 include("conexion.php");
+require_once 'mail_send.php';
+
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
@@ -719,41 +721,23 @@ function promoteUser($data) {
         $stmt->execute();
 
         // Send PIN via email
-        require 'vendor/autoload.php';
+        
         $mail = new PHPMailer\PHPMailer\PHPMailer(true);
 
         try {
-            // Server settings
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'the.photographerpap@gmail.com';
-            $mail->Password = 'bbyp zddi irkb hurc';
-            $mail->SMTPSecure = 'tls';
-            $mail->Port = 587;
-
-            // Recipients
-            $mail->setFrom('no-reply@thephotographer.com', 'The Photographer');
-            $mail->addAddress($user['email']);
-
-            // Content
-            $mail->isHTML(true);
-            $mail->Subject = 'Your New Admin PIN';
-            $mail->Body = "Congratulations! You've been promoted to admin.<br><br>"
-                . "Your admin PIN is: <strong>$pin</strong><br><br>"
-                . "Please keep this PIN secure as it will be required for admin actions.";
-            $mail->AltBody = "Congratulations! You've been promoted to admin.\n\n"
-                . "Your admin PIN is: $pin\n\n"
-                . "Please keep this PIN secure.";
-
-            $mail->send();
+            $subject = 'Your New Admin PIN';
+            $body = "Congratulations! You've been promoted to admin.<br><br>Your admin PIN is: <strong>$pin</strong><br><br>Please keep this PIN secure as it will be required for admin actions.";
+            $altBody = "Congratulations! You've been promoted to admin.\n\nYour admin PIN is: $pin\n\nPlease keep this PIN secure.";
+            $mailResult = sendMail($user['email'], $subject, $body, $altBody);
+            if (!$mailResult['success']) {
+                error_log("Email sending failed: " . $mailResult['message']);
+            }
         } catch (Exception $e) {
-            // Log email error but don't fail the promotion
-            error_log("Email sending failed: " . $e->getMessage());
+        error_log("Email sending failed: " . $e->getMessage());
         }
 
         return ['success' => true];
-    } catch (Exception $e) {
+        } catch (Exception $e) {
         return ['success' => false, 'message' => $e->getMessage()];
     }
 }
@@ -791,36 +775,17 @@ function demoteUser($data) {
 
         if ($stmt->execute()) {
             // Send demotion notification
-            require 'vendor/autoload.php';
             $mail = new PHPMailer\PHPMailer\PHPMailer(true);
 
             try {
-                // Server settings (same as above)
-                $mail->isSMTP();
-                $mail->Host = 'smtp.gmail.com';
-                $mail->SMTPAuth = true;
-                $mail->Username = 'the.photographerpap@gmail.com';
-                $mail->Password = 'bbyp zddi irkb hurc';
-                $mail->SMTPSecure = 'tls';
-                $mail->Port = 587;
-
-                // Recipients
-                $mail->setFrom('no-reply@thephotographer.com', 'The Photographer');
-                $mail->addAddress($user['email']);
-
-                // Content
-                $mail->isHTML(true);
-                $mail->Subject = 'Admin Status Update';
-                $mail->Body = "Your admin privileges have been removed.<br><br>"
-                    . "You no longer have access to admin features.<br><br>"
-                    . "If this was done in error, please contact the head admin.";
-                $mail->AltBody = "Your admin privileges have been removed.\n\n"
-                    . "You no longer have access to admin features.\n\n"
-                    . "If this was done in error, please contact the head admin.";
-
-                $mail->send();
+                $subject = 'Admin Status Update';
+                $body = "Your admin privileges have been removed.<br><br>You no longer have access to admin features.<br><br>If this was done in error, please contact the head admin.";
+                $altBody = "Your admin privileges have been removed.\n\nYou no longer have access to admin features.\n\nIf this was done in error, please contact the head admin.";
+                $mailResult = sendMail($user['email'], $subject, $body, $altBody);
+                if (!$mailResult['success']) {
+                    error_log("Email sending failed: " . $mailResult['message']);
+                }
             } catch (Exception $e) {
-                // Log email error but don't fail the demotion
                 error_log("Email sending failed: " . $e->getMessage());
             }
 

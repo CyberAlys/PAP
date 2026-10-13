@@ -8,6 +8,4 @@ since you always forget, to reset the auto increment you run "ALTER TABLE tablen
 <br>
 <s>fix image sizing for big images</s> <br>
 
-<hr>
-Emotional support Token Femtanyl
-<img src="https://preview.redd.it/is-token-supposed-to-be-self-harm-character-or-some-sorta-v0-koomic0xsujd1.jpg?width=700&format=pjpg&auto=webp&s=7a5337e71f1105e318c2f2de74b379ac8c2f83df">
+Defunct now
